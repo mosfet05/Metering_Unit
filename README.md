@@ -1,5 +1,4 @@
-# Metering_Unit
-Centrale de mesure
+# Centrale de mesure
 
 Voici une centrale de mesure avec :
 * 18 mesures d'énergie électrique
