@@ -1,0 +1,2790 @@
+substitutions:
+  # GPIO setup
+  GPIO_display_backlight: "42"
+  GPIO_CS_MeterChipA: "41"
+  GPIO_CS_MeterChipB: "7"
+  GPIO_CS_MeterChipC: "39"
+  GPIO_CS_MeterChipD: "38"
+  GPIO_CS_MeterChipE: "17"
+  GPIO_CS_MeterChipF: "2"
+
+  GPIO_Counter_A: "6"
+  GPIO_Counter_B: "40"
+  GPIO_Counter_C: "8"
+
+  GPIO_CS_Display: "4"
+  GPIO_HMI_Encoder_A: "37"
+  GPIO_HMI_Encoder_B: "36"
+  GPIO_HMI_Encoder_BP: "5"
+  GPIO_HMI_LED: "9"
+
+  GPIO_SPI0_SCLK: "14"
+  GPIO_SPI0_MOSI: "15"
+  GPIO_SPI0_MISO: "16"
+
+  GPIO_SPI1_SCLK: "34"
+  GPIO_SPI1_MOSI: "35"
+  GPIO_SPI1_MISO: "12"
+  GPIO_CS_Eth: "13"
+  GPIO_Int_Eth: "11"
+  GPIO_Rst_Eth: "10"
+
+  GPIO_TIC_RX: "44"
+
+  GPIO_IO_A: "43"
+  GPIO_IO_B: "3"
+
+
+  # For 12Vac transformer
+  Meters_gain_U: "19720"
+
+  # Current Sensor : https://www.aliexpress.com/item/1005006797684716.html
+  Meters_gain_CT_10A: "3084"
+  Meters_gain_CT_15A: "4626"
+  Meters_gain_CT_20A: "6200"
+  Meters_gain_CT_30A: "8650"
+  Meters_gain_CT_50A: "15420"
+
+  # Keywords
+  NameTemp: "Temperature"
+  NameHumidity: "Humidite"
+  NameFrequence: "Frequence"
+  NameVoltage: "Tension"
+  NameIntensity: "Courant"
+  NamePower: "Puissance"
+  Name_Energy: "Energie"
+  NameInstFlow: "Debit instantane"
+  NameTotal: "Total"
+  NameCmdCalibration: "Calibrer"
+  NameCmdOffsetCalibration: "RAZ calibration"
+  NameIPAddr: "@IP"
+  NameMACAddr: "@MAC"
+  NameUptime: "Actif"
+  PageTitleTIC: "Infos. Linky"
+  PageTitleMeasure: "Voie"
+  PageTitleEnergy: "Energie"
+  PageTitleCounter: "Cpt."
+  PageTitleMultiusageIO_A: "IO A - garage"
+  PageTitleMultiusageIO_B: "IO B - Temperatures"
+  PageTitleSystem: "Systeme"
+  Unconnected_Message: "Deconnecte"
+  Name_Cmd_Restart: "Redemarrer"
+
+  # TIC label
+  NameTIC_ADCO: "PDL"
+  NameTICCurrentD: "En cours"
+  NameTICNextD: "Demain"
+  NameTICColor: "Couleur"
+  NameTICBlueD: "Bleu"
+  NameTICWhiteD: "Blanc"
+  NameTICRedD: "Rouge"
+  NameTICPTEC: "Rouge"
+
+  # Power meters name
+  NameMeterA: "Mesures 1>3"
+  NameMeterB: "Mesures 4>6"
+  NameMeterC: "Mesures 7>9"
+  NameMeterD: "Mesures 10>12"
+  NameMeterE: "Mesures 13>15"
+  NameMeterF: "Mesures 16>18"
+
+  # Power meters chanel name
+  NameMeterA_Ch01: "VMC"
+  NameMeterA_Ch02: "PC etage 1"
+  NameMeterA_Ch03: "PC Salon"
+  NameMeterB_Ch01: "PC SaM"
+  NameMeterB_Ch02: "PC Bureau"
+  NameMeterB_Ch03: "PC Credenc"
+  NameMeterC_Ch01: "Cuisson"
+  NameMeterC_Ch02: "Four"
+  NameMeterC_Ch03: "L. vaissel"
+  NameMeterD_Ch01: "S. linge"
+  NameMeterD_Ch02: "L. linge"
+  NameMeterD_Ch03: "Chauf eau"
+  NameMeterE_Ch01: "Chaudiere"
+  NameMeterE_Ch02: "Frigo"
+  NameMeterE_Ch03: "Congel"
+  NameMeterF_Ch01: "Baie info"
+  NameMeterF_Ch02: "Ecl1 RdC"
+  NameMeterF_Ch03: "PC Ext"
+
+  # Counters name
+  NameCounterA: "Gaz"
+  NameCounterB: "Eau"
+  NameCounterC: "Inutilise"
+
+  #Multiusage IO name
+  NameIOA: "Garage"
+  NameIOB_01: "Ballon ECS"
+  NameIOB_02: "Depart ECS"
+  NameIOB_03: "Retour ECS"
+  NameIOB_04: "Cellier"
+
+  #Linky name
+  Name_Linky_PTEC: "Linky Periode Tarifaire"
+  Name_Linky_ADCO: "Linky Adresse"
+  Name_Linky_HCHC: "Linky Index HC"
+  Name_Linky_HCHP: "Linky Index HP"
+  Name_Linky_IINST: "Linky Intensite instantannee"
+  Name_Linky_PAPP: "Linky Puissance Apparente Instantanee Soutiree"
+  Name_Linky_MOTDETAT: "Linky Mot d'etat"
+
+  # Parameters
+  DisplayTurnOffDelay: 10min
+
+# Globals variable
+globals:
+  # Page number managment
+- id: display_page
+  type: int
+  initial_value: "-1"
+
+- id: counter_a_total_save
+  type: float
+  initial_value: "0.0"
+  restore_value: True
+
+- id: counter_b_total_save
+  type: float
+  initial_value: "0.0"
+  restore_value: True
+
+#- id: counter_c_total_save
+#  type: float
+#  initial_value: "0.0"
+#  restore_value: True
+
+
+preferences:
+    flash_write_interval: 5min
+  
+# ESP Home API
+esphome:
+  name: centrale-de-mesure
+  friendly_name: Centrale de mesure
+
+  on_boot: 
+    then:
+      - pulse_meter.set_total_pulses:
+         id: counter_a
+         value: !lambda "return id(counter_a_total_save);"
+
+      - pulse_meter.set_total_pulses:
+         id: counter_b
+         value: !lambda "return id(counter_b_total_save);"
+
+#      - pulse_meter.set_total_pulses:
+#        id: counter_c_total
+#        value: !lambda "return id(counter_c_total_save);"
+
+# ESP32 plateform definition
+esp32:
+  # For Waveshare ESP32-S2 development board, use deneyap mini as board selection
+  board: deneyapmini
+  variant: ESP32S2
+
+  # Arduino framwork doesn't work with Ethernet component (reboot loop issue when Ethernet cord is plugged)
+  framework:
+    type: esp-idf
+    version: recommended
+
+# Enable logging
+logger:
+    level: ERROR
+
+# Only 3 attemp for finding devices before rolling back in safe mode
+safe_mode:
+  num_attempts: 3
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret project_centralemesure_api_key
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+    password: !secret project_centralemesure_ota_key
+
+# With Ethernet component the Web interface has to be as lightest as possible (with the logger component, a crash can occur)
+web_server:
+  id: web_interface
+  port: 80
+  version: 3
+  local: False
+  include_internal: False
+  log: False
+  auth:
+    username: !secret project_centralemesure_web_user
+    password: !secret project_centralemesure_web_password
+
+  # Elements grouping
+  sorting_groups:
+    - id: sorting_group_meter_A
+      name: ${NameMeterA}
+      sorting_weight: 10
+    - id: sorting_group_meter_B
+      name: ${NameMeterB}
+      sorting_weight: 11
+    - id: sorting_group_meter_C
+      name: ${NameMeterC}
+      sorting_weight: 12
+    - id: sorting_group_meter_D
+      name: ${NameMeterD}
+      sorting_weight: 13
+    - id: sorting_group_meter_E
+      name: ${NameMeterE}
+      sorting_weight: 14
+    - id: sorting_group_meter_F
+      name: ${NameMeterF}
+      sorting_weight: 15
+    
+    - id: sorting_group_meter_Counter
+      name: ${PageTitleCounter}
+      sorting_weight: 30
+    
+    - id: sorting_group_meter_MultiusageIO_A
+      name: ${PageTitleMultiusageIO_A}
+      sorting_weight: 40
+    - id: sorting_group_meter_MultiusageIO_B
+      name: ${PageTitleMultiusageIO_B}
+      sorting_weight: 41
+
+    - id: sorting_group_TIC
+      name: ${PageTitleTIC}
+      sorting_weight: 50
+    
+    - id: sorting_group_System
+      name: ${PageTitleSystem}
+      sorting_weight: 90
+
+# Time: https://esphome.io/components/time.html
+time:
+  - platform: homeassistant
+    timezone: "Europe/Paris"
+    id: homeassistant_time
+
+# Wifi cannot be used with Ethernet component
+# wifi:
+#   ssid: !secret wifi_ssid
+#   password: !secret wifi_password
+#   id: wlan0
+
+#   # Enable fallback hotspot (captive portal) in case wifi connection fails
+#   ap:
+#     ssid: !secret project_centralemesure_fallback_wifi_ssid
+#     password: !secret project_centralemesure_fallback_wifi_password
+
+# Ethernet SPI configuration
+ethernet:
+  id: lan0
+  type: W5500
+  clk_pin: ${GPIO_SPI1_SCLK}
+  mosi_pin: ${GPIO_SPI1_MOSI}
+  miso_pin: ${GPIO_SPI1_MISO}
+  cs_pin: ${GPIO_CS_Eth}
+  interrupt_pin: ${GPIO_Int_Eth}
+  reset_pin: ${GPIO_Rst_Eth}
+
+# Hardware interfaces
+
+# SPI configuration
+spi:
+  - id: spi_bus0
+    clk_pin: ${GPIO_SPI0_SCLK}
+    mosi_pin: ${GPIO_SPI0_MOSI}
+    miso_pin: ${GPIO_SPI0_MISO}
+    # With Ethernet component, interface must be spi3 or software, nothing else
+    # Software SPI is mandatory for more than 6 SPI slaves
+    interface: software
+
+# UART configuration for TIC
+uart:
+  - id: uart_TIC
+    rx_pin: ${GPIO_TIC_RX}
+    baud_rate: 1200 # 9600 == mode standard, 1200 == mode historique
+    parity: EVEN
+    data_bits: 7
+    stop_bits: 1
+
+# Linky TIC configuration
+teleinfo:
+  - id: TIC_Teleinfo
+    historical_mode: True
+    update_interval: 2s
+    uart_id: uart_TIC
+
+# One wire configuration on I/O B
+one_wire:
+  - id: one_wire_B
+    platform: gpio
+    pin: ${GPIO_IO_B}
+
+# Logger level selector
+select:
+  - platform: logger
+    name: "Niveau de Log"
+    id: logger_select
+    web_server:
+      sorting_group_id: sorting_group_System
+
+# Sensors section
+sensor:
+  - platform: uptime
+    id: sys_uptime
+    name: ${NameUptime}
+    unit_of_measurement: s
+    device_class: duration
+    accuracy_decimals: 0
+    update_interval: 60s
+
+ # Metering chip A datas
+  - platform: atm90e32
+    cs_pin:
+      number: ${GPIO_CS_MeterChipA}
+      inverted: False
+      mode: OUTPUT
+    id: MeteringChipA
+
+    # Phase A section
+    phase_a:
+      voltage:
+        name: ${NameVoltage} ${NameMeterA_Ch01}
+        id: MeteringChipA_Ch01_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+
+      current:
+        name: ${NameIntensity} ${NameMeterA_Ch01}
+        id: MeteringChipA_Ch01_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+
+      power:
+        name: ${NamePower} ${NameMeterA_Ch01}
+        id: MeteringChipA_Ch01_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterA_Ch01}
+        id: MeteringChipA_Ch01_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_10A}
+
+    # Phase B section
+    phase_b:
+      voltage:
+        name: ${NameVoltage} ${NameMeterA_Ch02}
+        id: MeteringChipA_Ch02_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+
+      current:
+        name: ${NameIntensity} ${NameMeterA_Ch02}
+        id: MeteringChipA_Ch02_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+
+      power:
+        name: ${NamePower} ${NameMeterA_Ch02}
+        id: MeteringChipA_Ch02_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterA_Ch02}
+        id: MeteringChipA_Ch02_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_50A}
+
+    # Phase C section
+    phase_c:
+      voltage:
+        name: ${NameVoltage} ${NameMeterA_Ch03}
+        id: MeteringChipA_Ch03_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+        
+      current:
+        name: ${NameIntensity} ${NameMeterA_Ch03}
+        id: MeteringChipA_Ch03_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+        
+      power:
+        name: ${NamePower} ${NameMeterA_Ch03}
+        id: MeteringChipA_Ch03_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterA_Ch03}
+        id: MeteringChipA_Ch03_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_A
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Common section
+    frequency:
+      name: ${NameFrequence} ${NameMeterA}
+      id: MeteringChipA_frequency
+      device_class: frequency
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_meter_A
+
+    chip_temperature:
+      name: ${NameTemp} ${NameMeterA}
+      id: MeteringChipA_chip_temperature
+      device_class: temperature
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_System
+      
+    line_frequency: 50Hz
+    current_phases: 3
+    gain_pga: 1X
+    update_interval: 1s
+    spi_id: spi_bus0
+    # Software SPI --> Slowing down SPI speed
+    data_rate: 200kHz
+
+  # Metering chip B datas
+  - platform: atm90e32
+    cs_pin:
+      number: ${GPIO_CS_MeterChipB}
+      inverted: False
+      mode: OUTPUT
+    id: MeteringChipB
+
+    # Phase A section
+    phase_a:
+      voltage:
+        name: ${NameVoltage} ${NameMeterB_Ch01}
+        id: MeteringChipB_Ch01_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      current:
+        name: ${NameIntensity} ${NameMeterB_Ch01}
+        id: MeteringChipB_Ch01_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      power:
+        name: ${NamePower} ${NameMeterB_Ch01}
+        id: MeteringChipB_Ch01_power
+        device_class: power
+        state_class: measurement
+
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterB_Ch01}
+        id: MeteringChipB_Ch01_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Phase B section
+    phase_b:
+      voltage:
+        name: ${NameVoltage} ${NameMeterB_Ch02}
+        id: MeteringChipB_Ch02_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      current:
+        name: ${NameIntensity} ${NameMeterB_Ch02}
+        id: MeteringChipB_Ch02_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      power:
+        name: ${NamePower} ${NameMeterB_Ch02}
+        id: MeteringChipB_Ch02_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterB_Ch02}
+        id: MeteringChipB_Ch02_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Phase C section
+    phase_c:
+      voltage:
+        name: ${NameVoltage} ${NameMeterB_Ch03}
+        id: MeteringChipB_Ch03_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      current:
+        name: ${NameIntensity} ${NameMeterB_Ch03}
+        id: MeteringChipB_Ch03_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      power:
+        name: ${NamePower} ${NameMeterB_Ch03}
+        id: MeteringChipB_Ch03_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterB_Ch03}
+        id: MeteringChipB_Ch03_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_B
+
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Common section
+    frequency:
+      name: ${NameFrequence} ${NameMeterB}
+      id: MeteringChipB_frequency
+      device_class: frequency
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_meter_B
+    
+    chip_temperature:
+      name: ${NameTemp} ${NameMeterB}
+      id: MeteringChipB_chip_temperature
+      device_class: temperature
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_System
+    
+    line_frequency: 50Hz
+    current_phases: 3
+    gain_pga: 1X
+    update_interval: 1s
+    spi_id: spi_bus0
+    # Software SPI --> Slowing down SPI speed
+    data_rate: 200kHz
+
+  # Metering chip C datas
+  - platform: atm90e32
+    cs_pin:
+      number: ${GPIO_CS_MeterChipC}
+      inverted: False
+      mode: OUTPUT
+    id: MeteringChipC
+
+    # Phase A section
+    phase_a:
+      voltage:
+        name: ${NameVoltage} ${NameMeterC_Ch01}
+        id: MeteringChipC_Ch01_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      current:
+        name: ${NameIntensity} ${NameMeterC_Ch01}
+        id: MeteringChipC_Ch01_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      power:
+        name: ${NamePower} ${NameMeterC_Ch01}
+        id: MeteringChipC_Ch01_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterC_Ch01}
+        id: MeteringChipC_Ch01_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_30A}
+
+    # Phase B section
+    phase_b:
+      voltage:
+        name: ${NameVoltage} ${NameMeterC_Ch02}
+        id: MeteringChipC_Ch02_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      current:
+        name: ${NameIntensity} ${NameMeterC_Ch02}
+        id: MeteringChipC_Ch02_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      power:
+        name: ${NamePower} ${NameMeterC_Ch02}
+        id: MeteringChipC_Ch02_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterC_Ch02}
+        id: MeteringChipC_Ch02_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Phase C section
+    phase_c:
+      voltage:
+        name: ${NameVoltage} ${NameMeterC_Ch03}
+        id: MeteringChipC_Ch03_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      current:
+        name: ${NameIntensity} ${NameMeterC_Ch03}
+        id: MeteringChipC_Ch03_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      power:
+        name: ${NamePower} ${NameMeterC_Ch03}
+        id: MeteringChipC_Ch03_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterC_Ch03}
+        id: MeteringChipC_Ch03_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_C
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Common section
+    frequency:
+      name: ${NameFrequence} ${NameMeterC}
+      id: MeteringChipC_frequency
+      device_class: frequency
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_meter_C
+
+    chip_temperature:
+      name: ${NameTemp} ${NameMeterC}
+      id: MeteringChipC_chip_temperature
+      device_class: temperature
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_System
+    line_frequency: 50Hz
+    current_phases: 3
+    gain_pga: 1X
+    update_interval: 1s
+    spi_id: spi_bus0
+    # Software SPI --> Slowing down SPI speed
+    data_rate: 200kHz
+
+  # Metering chip D datas
+  - platform: atm90e32
+    cs_pin:
+      number: ${GPIO_CS_MeterChipD}
+      inverted: False
+      mode: OUTPUT
+    id: MeteringChipD
+
+    # Phase A section
+    phase_a:
+      voltage:
+        name: ${NameVoltage} ${NameMeterD_Ch01}
+        id: MeteringChipD_Ch01_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      current:
+        name: ${NameIntensity} ${NameMeterD_Ch01}
+        id: MeteringChipD_Ch01_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      power:
+        name: ${NamePower} ${NameMeterD_Ch01}
+        id: MeteringChipD_Ch01_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterD_Ch01}
+        id: MeteringChipD_Ch01_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Phase B section
+    phase_b:
+      voltage:
+        name: ${NameVoltage} ${NameMeterD_Ch02}
+        id: MeteringChipD_Ch02_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      current:
+        name: ${NameIntensity} ${NameMeterD_Ch02}
+        id: MeteringChipD_Ch02_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      power:
+        name: ${NamePower} ${NameMeterD_Ch02}
+        id: MeteringChipD_Ch02_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterD_Ch02}
+        id: MeteringChipD_Ch02_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+     
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Phase C section
+    phase_c:
+      voltage:
+        name: ${NameVoltage} ${NameMeterD_Ch03}
+        id: MeteringChipD_Ch03_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      current:
+        name: ${NameIntensity} ${NameMeterD_Ch03}
+        id: MeteringChipD_Ch03_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      power:
+        name: ${NamePower} ${NameMeterD_Ch03}
+        id: MeteringChipD_Ch03_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterD_Ch03}
+        id: MeteringChipD_Ch03_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_D
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Common section
+    frequency:
+      name: ${NameFrequence} ${NameMeterD}
+      id: MeteringChipD_frequency
+      device_class: frequency
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_meter_D
+    
+    chip_temperature:
+      name: ${NameTemp} ${NameMeterD}
+      id: MeteringChipD_chip_temperature
+      device_class: temperature
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_System
+    
+    line_frequency: 50Hz
+    current_phases: 3
+    gain_pga: 1X
+    update_interval: 1s
+    spi_id: spi_bus0
+    # Software SPI --> Slowing down SPI speed
+    data_rate: 200kHz
+
+  # Metering chip E datas
+  - platform: atm90e32
+    cs_pin:
+      number: ${GPIO_CS_MeterChipE}
+      inverted: False
+      mode: OUTPUT
+    id: MeteringChipE
+
+    # Phase A section
+    phase_a:
+      voltage:
+        name: ${NameVoltage} ${NameMeterE_Ch01}
+        id: MeteringChipE_Ch01_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      current:
+        name: ${NameIntensity} ${NameMeterE_Ch01}
+        id: MeteringChipE_Ch01_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+
+      power:
+        name: ${NamePower} ${NameMeterE_Ch01}
+        id: MeteringChipE_Ch01_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterE_Ch01}
+        id: MeteringChipE_Ch01_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_10A}
+
+    # Phase B section
+    phase_b:
+      voltage:
+        name: ${NameVoltage} ${NameMeterE_Ch02}
+        id: MeteringChipE_Ch02_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      current:
+        name: ${NameIntensity} ${NameMeterE_Ch02}
+        id: MeteringChipE_Ch02_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      power:
+        name: ${NamePower} ${NameMeterE_Ch02}
+        id: MeteringChipE_Ch02_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterE_Ch02}
+        id: MeteringChipE_Ch02_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Phase C section
+    phase_c:
+      voltage:
+        name: ${NameVoltage} ${NameMeterE_Ch03}
+        id: MeteringChipE_Ch03_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      current:
+        name: ${NameIntensity} ${NameMeterE_Ch03}
+        id: MeteringChipE_Ch03_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      power:
+        name: ${NamePower} ${NameMeterE_Ch03}
+        id: MeteringChipE_Ch03_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterE_Ch03}
+        id: MeteringChipE_Ch03_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_E
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Common section
+    frequency:
+      name: ${NameFrequence} ${NameMeterE}
+      id: MeteringChipE_frequency
+      device_class: frequency
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_meter_E
+      
+    chip_temperature:
+      name: ${NameTemp} ${NameMeterE}
+      id: MeteringChipE_chip_temperature
+      device_class: temperature
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_System
+      
+    line_frequency: 50Hz
+    current_phases: 3
+    gain_pga: 1X
+    update_interval: 1s
+    spi_id: spi_bus0
+    # Software SPI --> Slowing down SPI speed
+    data_rate: 200kHz
+
+# Metering chip F datas
+  - platform: atm90e32
+    cs_pin:
+      number: ${GPIO_CS_MeterChipF}
+      inverted: False
+      mode: OUTPUT
+    id: MeteringChipF
+
+    # Phase A section
+    phase_a:
+      voltage:
+        name: ${NameVoltage} ${NameMeterF_Ch01}
+        id: MeteringChipF_Ch01_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+      
+      current:
+        name: ${NameIntensity} ${NameMeterF_Ch01}
+        id: MeteringChipF_Ch01_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+      
+      power:
+        name: ${NamePower} ${NameMeterF_Ch01}
+        id: MeteringChipF_Ch01_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterF_Ch01}
+        id: MeteringChipF_Ch01_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_15A}
+
+    # Phase B section
+    phase_b:
+      voltage:
+        name: ${NameVoltage} ${NameMeterF_Ch02}
+        id: MeteringChipF_Ch02_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+      
+      current:
+        name: ${NameIntensity} ${NameMeterF_Ch02}
+        id: MeteringChipF_Ch02_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+      
+      power:
+        name: ${NamePower} ${NameMeterF_Ch02}
+        id: MeteringChipF_Ch02_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterF_Ch02}
+        id: MeteringChipF_Ch02_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_10A}
+
+    # Phase C section
+    phase_c:
+      voltage:
+        name: ${NameVoltage} ${NameMeterF_Ch03}
+        id: MeteringChipF_Ch03_voltage
+        device_class: voltage
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+      
+      current:
+        name: ${NameIntensity} ${NameMeterF_Ch03}
+        id: MeteringChipF_Ch03_current
+        device_class: current
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+      
+      power:
+        name: ${NamePower} ${NameMeterF_Ch03}
+        id: MeteringChipF_Ch03_power
+        device_class: power
+        state_class: measurement
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+      
+      forward_active_energy:
+        internal: True
+        name: ${Name_Energy} ${NameMeterF_Ch03}
+        id: MeteringChipF_Ch03_forward_p_energy
+        device_class: energy
+        state_class: total
+        web_server:
+          sorting_group_id: sorting_group_meter_F
+      
+      gain_voltage: ${Meters_gain_U}
+      gain_ct: ${Meters_gain_CT_20A}
+
+    # Common section
+    frequency:
+      name: ${NameFrequence} ${NameMeterF}
+      id: MeteringChipF_frequency
+      device_class: frequency
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_meter_F
+      
+    chip_temperature:
+      name: ${NameTemp} ${NameMeterF}
+      id: MeteringChipF_chip_temperature
+      device_class: temperature
+      state_class: measurement
+      web_server:
+        sorting_group_id: sorting_group_System
+
+    line_frequency: 50Hz
+    current_phases: 3
+    gain_pga: 1X
+    update_interval: 1s
+    spi_id: spi_bus0
+    # Software SPI --> Slowing down SPI speed
+    data_rate: 200kHz
+
+  # Gas consumption (A counter)
+  # 1 pulse --> 10L (Gazpar)
+  - platform: pulse_meter
+    pin:
+      number: ${GPIO_Counter_A}
+      inverted: False
+      mode: INPUT
+
+    name: ${NameInstFlow} ${NameCounterA}
+    id: counter_a
+    unit_of_measurement: "L/min"
+    icon: "mdi:gas-burner"
+    timeout: 10min
+    internal_filter_mode: EDGE
+    internal_filter: 100ms
+    accuracy_decimals: 3
+    filters:
+      - multiply: 10.0
+    web_server:
+      sorting_group_id: sorting_group_meter_Counter
+
+    total:
+      name: ${NameTotal} ${NameCounterA}
+      id: counter_a_total
+      unit_of_measurement: "m³"
+      device_class: gas
+      icon: "mdi:gas-burner"
+      state_class: total_increasing
+      accuracy_decimals: 3
+      filters:
+        - lambda: |-
+            id(counter_a_total_save) = id(counter_a_total).raw_state;
+            return x*0.01;
+      web_server:
+        sorting_group_id: sorting_group_meter_Counter
+
+  # Water consumption (B counter)
+  # 1 pulse --> 1L
+  - platform: pulse_meter
+    pin:
+      number: ${GPIO_Counter_B}
+      inverted: False
+      mode: INPUT
+
+    name: ${NameInstFlow} ${NameCounterB}
+    id: counter_b
+    unit_of_measurement: "L/min"
+    icon: "mdi:water"
+    timeout: 10min
+    internal_filter_mode: EDGE
+    internal_filter: 100ms
+    accuracy_decimals: 3
+    filters:
+      - multiply: 1.0
+    web_server:
+      sorting_group_id: sorting_group_meter_Counter
+
+    total:
+      name: ${NameTotal} ${NameCounterB}
+      id: counter_b_total
+      unit_of_measurement: "m³"
+      device_class: water
+      icon: "mdi:water"
+      state_class: total_increasing
+      accuracy_decimals: 3
+      filters:
+        - lambda: |-
+            id(counter_b_total_save) = id(counter_b_total).raw_state;
+            return x*0.001;
+            
+      web_server:
+        sorting_group_id: sorting_group_meter_Counter
+      
+  # C counter (not used)
+  # 1 pulse --> xxL
+  # - platform: pulse_meter
+  #  pin:
+  #    number: ${GPIO_Counter_C}
+  #    inverted: False
+  #    mode: INPUT
+  #
+  #  name: ${NameInstFlow} ${NameCounterC}
+  #  unit_of_measurement: "L/min"
+  #  icon:
+  #  timeout: 1s
+  #  internal_filter_mode: EDGE
+  #  internal_filter: 200ms
+  #  accuracy_decimals: 1
+  #  filters:
+  #    - multiply : PULSE
+  # web_server:
+  #   sorting_group_id: sorting_group_meter_Counter
+  #
+  #  total:
+  #    name: ${NameTotal} ${NameCounterC}
+  #    id: counter_c_total
+  #    unit_of_measurement: "m³"
+  #    device_class:
+  #    state_class: total_increasing
+  #    accuracy_decimals: 3
+  #    icon:
+  #    filters:
+  #       - lambda: |-
+  #           id(counter_c_total_save) = id(counter_c_total).raw_state;
+  #           return x;
+  # web_server:
+  #   sorting_group_id: sorting_group_meter_Counter
+
+  # Total energy for meter chip A
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterA_Ch01}
+    power_id: MeteringChipA_Ch01_forward_p_energy
+    id: MeteringChipA_Ch01_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterA_Ch02}
+    power_id: MeteringChipA_Ch02_forward_p_energy
+    id: MeteringChipA_Ch02_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterA_Ch03}
+    power_id: MeteringChipA_Ch03_forward_p_energy
+    id: MeteringChipA_Ch03_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  # Total energy for meter chip B
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterB_Ch01}
+    power_id: MeteringChipB_Ch01_forward_p_energy
+    id: MeteringChipB_Ch01_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterB_Ch02}
+    power_id: MeteringChipB_Ch02_forward_p_energy
+    id: MeteringChipB_Ch02_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterB_Ch03}
+    power_id: MeteringChipB_Ch03_forward_p_energy
+    id: MeteringChipB_Ch03_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+  
+  # Total energy for meter chip C
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterC_Ch01}
+    power_id: MeteringChipC_Ch01_forward_p_energy
+    id: MeteringChipC_Ch01_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterC_Ch02}
+    power_id: MeteringChipC_Ch02_forward_p_energy
+    id: MeteringChipC_Ch02_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterC_Ch03}
+    power_id: MeteringChipC_Ch03_forward_p_energy
+    id: MeteringChipC_Ch03_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  # Total energy for meter chip D
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterD_Ch01}
+    power_id: MeteringChipD_Ch01_forward_p_energy
+    id: MeteringChipD_Ch01_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterD_Ch02}
+    power_id: MeteringChipD_Ch02_forward_p_energy
+    id: MeteringChipD_Ch02_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterD_Ch03}
+    power_id: MeteringChipD_Ch03_forward_p_energy
+    id: MeteringChipD_Ch03_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  # Total energy for meter chip E
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterE_Ch01}
+    power_id: MeteringChipE_Ch01_forward_p_energy
+    id: MeteringChipE_Ch01_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterE_Ch02}
+    power_id: MeteringChipE_Ch02_forward_p_energy
+    id: MeteringChipE_Ch02_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterE_Ch03}
+    power_id: MeteringChipE_Ch03_forward_p_energy
+    id: MeteringChipE_Ch03_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  # Total energy for meter chip F
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterF_Ch01}
+    power_id: MeteringChipF_Ch01_forward_p_energy
+    id: MeteringChipF_Ch01_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterF_Ch02}
+    power_id: MeteringChipF_Ch02_forward_p_energy
+    id: MeteringChipF_Ch02_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy} ${NameMeterF_Ch03}
+    power_id: MeteringChipF_Ch03_forward_p_energy
+    id: MeteringChipF_Ch03_Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  # Multiusage I/O A : Humidity and temperature of garage
+  - platform: dht
+    id: temp_humi_garage
+    pin: ${GPIO_IO_A}
+    model: DHT22
+    temperature:
+      name: ${NameTemp} ${NameIOA}
+      id: IOA_Temperature
+      web_server:
+        sorting_group_id: sorting_group_meter_MultiusageIO_A
+    
+    humidity:
+      name: ${NameHumidity} ${NameIOA}
+      id: IOA_Humidity
+      web_server:
+        sorting_group_id: sorting_group_meter_MultiusageIO_A
+    update_interval: 60s
+
+  # Multiusage I/O B : Temperature 01
+  - platform: dallas_temp
+    id: IOB_Temperature_01
+    one_wire_id: one_wire_B
+    name: ${NameTemp} ${NameIOB_01}
+    address: 0xc0000000bd11ed28
+    update_interval: 60s
+    web_server:
+      sorting_group_id: sorting_group_meter_MultiusageIO_B
+
+  # Multiusage I/O B : Temperature 02 
+  - platform: dallas_temp
+    id: IOB_Temperature_02
+    one_wire_id: one_wire_B
+    name: ${NameTemp} ${NameIOB_02}
+    address: 0xe1000000be55db28
+    update_interval: 60s
+    web_server:
+      sorting_group_id: sorting_group_meter_MultiusageIO_B
+
+  # Multiusage I/O B : Temperature 03
+  - platform: dallas_temp
+    id: IOB_Temperature_03
+    one_wire_id: one_wire_B
+    name: ${NameTemp} ${NameIOB_03}
+    address: 0x1a000000bfe3e628
+    update_interval: 60s
+    web_server:
+      sorting_group_id: sorting_group_meter_MultiusageIO_B
+  
+  # Multiusage I/O B : Temperature 04
+  - platform: dallas_temp
+    id: IOB_Temperature_04
+    one_wire_id: one_wire_B
+    name: ${NameTemp} ${NameIOB_04}
+    address: 0xd8000000bd130b28
+    update_interval: 60s
+    web_server:
+      sorting_group_id: sorting_group_meter_MultiusageIO_B
+
+  # HMI encoder
+  - platform: rotary_encoder
+    name: "Codeur IHM"
+    id: HMI_Encoder
+    pin_a:
+      number: ${GPIO_HMI_Encoder_A}
+      inverted: False
+      mode: INPUT
+    pin_b:
+      number: ${GPIO_HMI_Encoder_B}
+      inverted: False
+      mode: INPUT
+    internal: True
+    web_server:
+      sorting_group_id: sorting_group_System
+
+    # On clockwise rotation, display next page and wake up backlight
+
+    # Pages organization :
+    # - 0 --> 5 : Intensity and voltage measurment for each ATM90E32 chip
+    # - 10 --> 15 : Power measurment for each ATM90E32 chip
+    # - 20 : Linky energy index
+    # - 21 --> 26 : Energy index for each ATM90E32 chip
+    # - 30 : Meters A, B and C data
+    # - 40 --> 41 : Multiusage IO A and B data
+    # - 90 --> 91 : System informations
+    on_clockwise:
+      - lambda: |-
+          switch (id(display_page)){
+            // Page jump
+            case 5:
+              id(display_page) = 10;
+              break;
+            
+            case 15:
+              id(display_page) = 20;
+              break;
+            
+            case 26:
+              id(display_page) = 30;
+              break;
+            
+            case 30:
+              id(display_page) = 40;
+              break;
+            
+            case 41:
+              id(display_page) = 90;
+              break;
+            
+            case 91:
+              id(display_page) = 0;
+              break;
+            
+            // Select next page
+            default:
+              id(display_page) = id(display_page)+1;
+              break;
+          }
+
+      - script.stop: display_backlight_auto_off_timer
+      - script.execute: display_backlight_auto_off_timer
+      - if:
+          condition:
+            - light.is_off:
+                id: display_backlight
+          then:
+            - light.turn_on:
+                id: display_backlight
+                brightness: 100%
+
+    # On anticlockwise rotation, diplsay previous page and wake up backlight
+    on_anticlockwise:
+      - lambda: |-
+          switch (id(display_page)){
+            // Page jump
+            case 0:
+              id(display_page) = 91;
+              break;
+            
+            case 10:
+              id(display_page) = 5;
+              break;
+            
+            case 20:
+              id(display_page) = 15;
+              break;
+            
+            case 30:
+              id(display_page) = 26;
+              break;
+            
+            case 40:
+              id(display_page) = 30;
+              break;
+            
+            case 90:
+              id(display_page) = 41;
+              break;
+            
+            // Select previous page
+            default:
+              if(id(display_page) > 0) {
+                id(display_page) = id(display_page)-1;
+              }
+              else {
+                id(display_page) = 0;
+              }
+              break;
+          }
+
+      - script.stop: display_backlight_auto_off_timer
+      - script.execute: display_backlight_auto_off_timer
+      - if:
+          condition:
+            - light.is_off:
+                id: display_backlight
+          then:
+            - light.turn_on:
+                id: display_backlight
+                brightness: 100%
+
+  # Linky TIC section
+
+  # Linky HC index
+  - platform: teleinfo
+    id: TIC_HCHC
+    tag_name: "HCHC"
+    name: ${Name_Linky_HCHC}
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: TIC_Teleinfo
+    device_class: energy
+    state_class: total
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+  # Linky HP index
+  - platform: teleinfo
+    id: TIC_HCHP
+    tag_name: "HCHP"
+    name: ${Name_Linky_HCHP}
+    unit_of_measurement: "Wh"
+    icon: mdi:flash
+    teleinfo_id: TIC_Teleinfo
+    device_class: energy
+    state_class: total
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+  # Linky intensity
+  - platform: teleinfo
+    id: TIC_IRMS1
+    tag_name: "IINST"
+    name: ${Name_Linky_IINST}
+    unit_of_measurement: A
+    device_class: current
+    state_class: measurement
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+  # Linky apparent power
+  - platform: teleinfo
+    id: TIC_PAPP
+    tag_name: "PAPP"
+    name: ${Name_Linky_PAPP}
+    unit_of_measurement: VA
+    state_class: measurement
+    device_class: apparent_power
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+  # Index option Tempo
+  #- platform: teleinfo
+  #  id: TIC_BBRHCJB
+  #  tag_name: "BBRHCJB"
+  #  name: "Linky Index Tempo Bleu HC"
+  #  unit_of_measurement: kWh
+  #  device_class: energy
+  #  state_class: total_increasing
+  #  accuracy_decimals: 3
+  #  filters:
+  #    - multiply: 0.001
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+
+  #- platform: teleinfo
+  #  id: TIC_BBRHPJB
+  #  tag_name: "BBRHPJB"
+  #  name: "Linky Index Tempo Bleu HP"
+  #  unit_of_measurement: kWh
+  #  device_class: energy
+  #  state_class: total_increasing
+  #  accuracy_decimals: 3
+  #  filters:
+  #    - multiply: 0.001
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+
+  #- platform: teleinfo
+  #  id: TIC_BBRHCJW
+  #  tag_name: "BBRHCJW"
+  #  name: "Linky Index Tempo Blanc HC"
+  #  unit_of_measurement: kWh
+  #  device_class: energy
+  #  state_class: total_increasing
+  #  accuracy_decimals: 3
+  #  filters:
+  #    - multiply: 0.001
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+
+  #- platform: teleinfo
+  #  id: TIC_BBRHPJW
+  #  tag_name: "BBRHPJW"
+  #  name: "Linky Index Tempo Blanc HP"
+  #  unit_of_measurement: kWh
+  #  device_class: energy
+  #  state_class: total_increasing
+  #  accuracy_decimals: 3
+  #  filters:
+  #    - multiply: 0.001
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+
+  #- platform: teleinfo
+  #  id: TIC_BBRHCJR
+  #  tag_name: "BBRHCJR"
+  #  name: "Linky Index Tempo Rouge HC"
+  #  unit_of_measurement: kWh
+  #  device_class: energy
+  #  state_class: total_increasing
+  #  accuracy_decimals: 3
+  #  filters:
+  #    - multiply: 0.001
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+
+  #- platform: teleinfo
+  #  id: TIC_BBRHPJR
+  #  tag_name: "BBRHPJR"
+  #  name: "Linky Index Tempo Rouge HP"
+  #  unit_of_measurement: kWh
+  #  device_class: energy
+  #  state_class: total_increasing
+  #  accuracy_decimals: 3
+  #  filters:
+  #    - multiply: 0.001
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+
+text_sensor:
+  # Ethernet addresses
+  - platform: ethernet_info
+    ip_address:
+      name: ${NameIPAddr}
+      id: lan0_ip_addr
+    mac_address:
+      name: ${NameMACAddr}
+      id: lan0_mac_addr
+  
+  - platform: template
+    name: ${NameUptime}
+    id: sys_uptime_txt
+    update_interval: 60s
+    icon: mdi:clock-start
+    lambda: |-
+      int seconds = (id(sys_uptime).state);
+      int days = seconds / (24 * 3600);
+      seconds = seconds % (24 * 3600);
+      int hours = seconds / 3600;
+      seconds = seconds % 3600;
+      int minutes = seconds /  60;
+      seconds = seconds % 60;
+      std::string uptime_str = "";
+      if ( days ) {
+        uptime_str = to_string(days) +"d " + to_string(hours) +"h " + to_string(minutes) +"m "+ to_string(seconds) +"s";
+      } else if ( hours ) {
+        uptime_str = to_string(hours) +"h " + to_string(minutes) +"m "+ to_string(seconds) +"s";
+      } else if ( minutes ) {
+        uptime_str = to_string(minutes) +"m "+ to_string(seconds) +"s";
+      } else {
+        uptime_str = to_string(seconds) +"s";
+      }
+      return uptime_str;
+                                                                                                                                
+  # Libelle tarif fournisseur en cours !!! INUTILE !!!
+  #- platform: teleinfo
+  #  id: TIC_LTARF
+  #  tag_name: "LTARF"
+  #  name: "Linky Tarif Actuel"
+  #  icon: mdi:information
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+
+  # Linky address (also known as "Point De Livraison")
+  - platform: teleinfo
+    id: TIC_ADCO
+    tag_name: "ADCO"
+    name: ${Name_Linky_ADCO}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+  # Linky tariff period
+  - platform: teleinfo
+    id: TIC_PTEC
+    tag_name: "PTEC"
+    name: ${Name_Linky_PTEC}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+  # Couleur du lendemain
+  #- platform: teleinfo
+  #  id: TIC_DEMAIN
+  #  tag_name: "DEMAIN"
+  #  name: "Linky Couleur Demain"
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+
+  # Horaire Heures Pleines Heures Creuses !!! INUTILE !!!
+  #- platform: teleinfo
+  #  id: TIC_HHPHC
+  #  tag_name: "HHPHC"
+  #  name: "Linky Horaire HP/HC"
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+
+  # Status word of Linky meter
+  - platform: teleinfo
+    id: TIC_MOTDETAT
+    tag_name: "MOTDETAT"
+    name: ${Name_Linky_MOTDETAT}
+
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+  # Presence des potentiels !!! INUTILE !!!
+  #- platform: teleinfo
+  #  id: TIC_PPOT
+  #  tag_name: "PPOT"
+  #  name: "Linky Presence Potentiels"
+  #
+  # web_server:
+  #   sorting_group_id: sorting_group_TIC
+button:
+  # ESP32 restart
+  - platform: restart
+    id: Cmd_Restart_Sys
+    name: ${Name_Cmd_Restart}
+
+    web_server:
+      sorting_group_id: sorting_group_System
+
+  # Calibration request for metering chip A
+  - platform: atm90e32
+    id: MeteringChipA
+    run_offset_calibration:
+      name: ${NameCmdCalibration} ${NameMeterA}
+      id: MeteringChipA_Calibration
+      web_server:
+        sorting_group_id: sorting_group_meter_A
+
+    clear_offset_calibration:
+      name: ${NameCmdOffsetCalibration} ${NameMeterA}
+      id: MeteringChipA_Offset_Calibration
+      web_server:
+        sorting_group_id: sorting_group_meter_A
+
+  # Calibration request for metering chip B
+  - platform: atm90e32
+    id: MeteringChipB
+    run_offset_calibration:
+      name: ${NameCmdCalibration} ${NameMeterB}
+      id: MeteringChipB_Calibration    
+      web_server:
+        sorting_group_id: sorting_group_meter_B
+
+    clear_offset_calibration:
+      name: ${NameCmdOffsetCalibration} ${NameMeterB}
+      id: MeteringChipB_Offset_Calibration    
+      web_server:
+        sorting_group_id: sorting_group_meter_B
+
+  # Calibration request for metering chip C
+  - platform: atm90e32
+    id: MeteringChipC
+    run_offset_calibration:
+      name: ${NameCmdCalibration} ${NameMeterC}
+      id: MeteringChipC_Calibration
+      web_server:
+        sorting_group_id: sorting_group_meter_C
+
+    clear_offset_calibration:
+      name: ${NameCmdOffsetCalibration} ${NameMeterC}
+      id: MeteringChipC_Offset_Calibration    
+      web_server:
+        sorting_group_id: sorting_group_meter_C
+
+  # Calibration request for metering chip D
+  - platform: atm90e32
+    id: MeteringChipD
+    run_offset_calibration:
+      name: ${NameCmdCalibration} ${NameMeterD}
+      id: MeteringChipD_Calibration
+      web_server:
+        sorting_group_id: sorting_group_meter_D
+    clear_offset_calibration:
+      name: ${NameCmdOffsetCalibration} ${NameMeterD}
+      id: MeteringChipD_Offset_Calibration
+      web_server:
+        sorting_group_id: sorting_group_meter_D
+
+  # Calibration request for metering chip E
+  - platform: atm90e32
+    id: MeteringChipE
+    run_offset_calibration:
+      name: ${NameCmdCalibration} ${NameMeterE}
+      id: MeteringChipE_Calibration
+      web_server:
+        sorting_group_id: sorting_group_meter_E
+
+    clear_offset_calibration:
+      name: ${NameCmdOffsetCalibration} ${NameMeterE}
+      id: MeteringChipE_Offset_Calibration
+      web_server:
+        sorting_group_id: sorting_group_meter_E
+
+  # Calibration request for metering chip F
+  - platform: atm90e32
+    id: MeteringChipF
+    run_offset_calibration:
+      name: ${NameCmdCalibration} ${NameMeterF}
+      id: MeteringChipF_Calibration
+      web_server:
+        sorting_group_id: sorting_group_meter_F
+
+    clear_offset_calibration:
+      name: ${NameCmdOffsetCalibration} ${NameMeterF}
+      id: MeteringChipF_Offset_Calibration
+      web_server:
+        sorting_group_id: sorting_group_meter_F
+
+  # Counter A, reset button
+  - platform: template
+    name: ${NameCounterA} - Reset
+    id: Reset_Counter_A
+    on_press:
+      - pulse_meter.set_total_pulses:
+          id: counter_a
+          value: 0.0
+    web_server:
+      sorting_group_id: sorting_group_meter_Counter
+
+  # Counter B, reset button
+  - platform: template
+    name: ${NameCounterB} - Reset
+    id: Reset_Counter_B
+    on_press:
+      - pulse_meter.set_total_pulses:
+          id: counter_b
+          value: 0.0
+    web_server:
+      sorting_group_id: sorting_group_meter_Counter
+
+  # Counter C, reset button
+  # - platform: template
+  #   name: ${NameCounterC} - Reset
+  #   id: Reset_Counter_C
+  #   on_press:
+  #     - pulse_meter.set_total_pulses:
+  #         id: counter_c
+  #         value: 0.0
+  #   web_server:
+  #   sorting_group_id: sorting_group_meter_Counter
+
+    
+# Status Binary Sensor: https://esphome.io/components/binary_sensor/status.html
+binary_sensor:
+  - platform: status
+    name: "Etat centrale de mesure"
+
+    web_server:
+      sorting_group_id: sorting_group_System
+
+  # HMI encoder push button
+  - platform: gpio
+    name: "Bouton codeur IHM"
+    id: HMI_Encoder_Button
+    pin:
+      number: ${GPIO_HMI_Encoder_BP}
+      inverted: True
+      mode: INPUT
+    internal: True
+    web_server:
+      sorting_group_id: sorting_group_System
+
+    # When pushing button, wake up backlight and display next information group
+    on_press:
+      then:
+        - lambda: |-
+           id(display_page) = id(display_page) + (10 - id(display_page) % 10); // Select the next group of pages (next 10 multiple)
+
+        - script.stop: display_backlight_auto_off_timer
+        - script.execute: display_backlight_auto_off_timer
+        - if:
+            condition:
+              - light.is_off:
+                  id: display_backlight
+            then:
+              - light.turn_on:
+                  id: display_backlight
+                  brightness: 100%
+
+output:
+  # Display backlight output
+  - platform: ledc
+    id: display_backlight_output
+    pin: ${GPIO_display_backlight}
+    frequency: 1000 Hz
+    min_power: 0%
+    max_power: 100%
+
+light:
+  # Display backlight control
+  - platform: monochromatic
+    id: display_backlight
+    output: display_backlight_output
+    restore_mode: ALWAYS_ON
+    internal: True
+    effects:
+    - pulse:
+        name: "Fast_Blink"
+        transition_length: 0s
+        update_interval: 500ms
+
+    - pulse:
+        name: "Std_Blink"
+        transition_length: 0s
+        update_interval: 10s
+
+    web_server:
+      sorting_group_id: sorting_group_System
+
+  # Status LED control
+  - platform: esp32_rmt_led_strip
+    id: Status_LED
+    rgb_order: RGB
+    chipset: WS2812
+    pin: ${GPIO_HMI_LED}
+    num_leds: 1
+    # rmt_channel  only for Arduino Framework (to be removed with ESP-IDF Framwork)
+    # rmt_channel: 0
+    internal: True
+    #restore_mode: ALWAYS_ON
+    effects:
+    - strobe:
+        name: "Red Purple Shading"
+        colors:
+          - state: true
+            brightness: 80%
+            red: 100%
+            green: 0%
+            blue: 0%
+            duration: 500ms
+          - state: false
+            duration: 250ms
+          - state: true
+            brightness: 80%
+            red: 100%
+            green: 0%
+            blue: 85%
+            duration: 500ms
+
+    - strobe:
+        name: "Red Shading"
+        colors:
+          - state: true
+            brightness: 80%
+            red: 100%
+            green: 80%
+            blue: 80%
+            duration: 500ms
+          - state: false
+            duration: 250ms
+          - state: true
+            brightness: 80%
+            red: 100%
+            green: 0%
+            blue: 0%
+            duration: 500ms
+
+    - strobe:
+        name: "Blue Purple Shading"
+        colors:
+          - state: true
+            brightness: 80%
+            red: 0%
+            green: 0%
+            blue: 100%
+            duration: 500ms
+          - state: false
+            duration: 250ms
+          - state: true
+            brightness: 80%
+            red: 100%
+            green: 0%
+            blue: 85%
+            duration: 500ms
+
+    - strobe:
+        name: "Blue Shading"
+        colors:
+          - state: true
+            brightness: 80%
+            red: 60%
+            green: 60%
+            blue: 100%
+            duration: 500ms
+          - state: false
+            duration: 250ms
+          - state: true
+            brightness: 80%
+            red: 0%
+            green: 0%
+            blue: 100%
+            duration: 500ms
+
+    - strobe:
+        name: "White Purple Shading"
+        colors:
+          - state: true
+            brightness: 80%
+            red: 100%
+            green: 100%
+            blue: 100%
+            duration: 500ms
+          - state: false
+            duration: 250ms
+          - state: true
+            brightness: 80%
+            red: 100%
+            green: 0%
+            blue: 85%
+            duration: 500ms
+
+    - strobe:
+        name: "White Shading"
+        colors:
+          - state: true
+            brightness: 80%
+            red: 80%
+            green: 80%
+            blue: 80%
+            duration: 500ms
+          - state: false
+            duration: 250ms
+          - state: true
+            brightness: 80%
+            red: 100%
+            green: 100%
+            blue: 100%
+            duration: 500ms
+
+    web_server:
+      sorting_group_id: sorting_group_System
+
+# HMI display
+font:
+  - file: "Font/arial.ttf"
+    id: FContent
+    size: 10
+
+  - file: "Font/arialbd.ttf"
+    id: FTitle
+    size: 12
+
+display:
+  - platform: st7920
+    spi_id: spi_bus0
+    cs_pin:
+      number: ${GPIO_CS_Display}
+      inverted: True
+      mode: OUTPUT
+    width: 128
+    height: 64
+    id: onboard_display
+    update_interval: 700ms
+    data_rate: 200kHz
+
+    # Pages organization :
+    # - 0 --> 5 : Intensity and voltage measurment for each ATM90E32 chip
+    # - 10 --> 15 : Power measurment for each ATM90E32 chip
+    # - 20 : Linky energy index
+    # - 21 --> 26 : Energy index for each ATM90E32 chip
+    # - 30 : Meters A, B and C data
+    # - 40 --> 41 : Multiusage IO A and B data
+    # - 90 --> 91 : System informations
+
+    lambda: |-
+        switch (id(display_page)){
+          // This page shows the measure of chip A
+          case 0:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}1>3");
+            it.print(62, 2, id(FTitle), "V");
+            it.print(115, 2, id(FTitle), "A");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterA_Ch01}");
+            it.printf(56, 21, id(FContent), "%3.0f", id(MeteringChipA_Ch01_voltage).state);
+            it.printf(92, 21, id(FContent), "%2.1f", id(MeteringChipA_Ch01_current).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterA_Ch02}");
+            it.printf(56, 36, id(FContent), "%3.0f", id(MeteringChipA_Ch02_voltage).state);
+            it.printf(92, 36, id(FContent), "%2.1f", id(MeteringChipA_Ch02_current).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterA_Ch03}");
+            it.printf(56, 51, id(FContent), "%3.0f", id(MeteringChipA_Ch03_voltage).state);
+            it.printf(92, 51, id(FContent), "%2.1f", id(MeteringChipA_Ch03_current).state);
+            break;
+
+          // This page shows the measure of chip B
+          case 1:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}4>6");
+            it.print(67, 2, id(FTitle), "V");
+            it.print(105, 2, id(FTitle), "A");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterB_Ch01}");
+            it.printf(56, 21, id(FContent), "%3.0f", id(MeteringChipB_Ch01_voltage).state);
+            it.printf(92, 21, id(FContent), "%2.1f", id(MeteringChipB_Ch01_current).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterB_Ch02}");
+            it.printf(56, 36, id(FContent), "%3.0f", id(MeteringChipB_Ch02_voltage).state);
+            it.printf(92, 36, id(FContent), "%2.1f", id(MeteringChipB_Ch02_current).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterB_Ch03}");
+            it.printf(56, 51, id(FContent), "%3.0f", id(MeteringChipB_Ch03_voltage).state);
+            it.printf(92, 51, id(FContent), "%2.1f", id(MeteringChipB_Ch03_current).state);
+            break;
+
+            break;
+
+          // This page shows the measure of chip C
+          case 2:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}7>9");
+            it.print(67, 2, id(FTitle), "V");
+            it.print(105, 2, id(FTitle), "A");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterC_Ch01}");
+            it.printf(56, 21, id(FContent), "%3.0f", id(MeteringChipC_Ch01_voltage).state);
+            it.printf(92, 21, id(FContent), "%2.1f", id(MeteringChipC_Ch01_current).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterC_Ch02}");
+            it.printf(56, 36, id(FContent), "%3.0f", id(MeteringChipC_Ch02_voltage).state);
+            it.printf(92, 36, id(FContent), "%2.1f", id(MeteringChipC_Ch02_current).state);
+            it.line(10, 49, 118, 49);
+            it.print(0, 51, id(FContent), "${NameMeterC_Ch03}");
+            it.printf(56, 51, id(FContent), "%3.0f", id(MeteringChipC_Ch03_voltage).state);
+            it.printf(92, 51, id(FContent), "%2.1f", id(MeteringChipC_Ch03_current).state);
+            break;
+
+          // This page shows the measure of chip D
+          case 3:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}10>12");
+            it.print(67, 2, id(FTitle), "V");
+            it.print(105, 2, id(FTitle), "A");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterD_Ch01}");
+            it.printf(56, 21, id(FContent), "%3.0f", id(MeteringChipD_Ch01_voltage).state);
+            it.printf(92, 21, id(FContent), "%2.1f", id(MeteringChipD_Ch01_current).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterD_Ch02}");
+            it.printf(56, 36, id(FContent), "%3.0f", id(MeteringChipD_Ch02_voltage).state);
+            it.printf(92, 36, id(FContent), "%2.1f", id(MeteringChipD_Ch02_current).state);
+            it.line(10, 49, 118, 49);
+            it.print(0, 51, id(FContent), "${NameMeterD_Ch03}");
+            it.printf(56, 51, id(FContent), "%3.0f", id(MeteringChipD_Ch03_voltage).state);
+            it.printf(92, 51, id(FContent), "%2.1f", id(MeteringChipD_Ch03_current).state);
+            break;
+
+          // This page shows the measure of chip E
+          case 4:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}13>15");
+            it.print(67, 2, id(FTitle), "V");
+            it.print(105, 2, id(FTitle), "A");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterE_Ch01}");
+            it.printf(56, 21, id(FContent), "%3.0f", id(MeteringChipE_Ch01_voltage).state);
+            it.printf(92, 21, id(FContent), "%2.1f", id(MeteringChipE_Ch01_current).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterE_Ch02}");
+            it.printf(56, 36, id(FContent), "%3.0f", id(MeteringChipE_Ch02_voltage).state);
+            it.printf(92, 36, id(FContent), "%2.1f", id(MeteringChipE_Ch02_current).state);
+            it.line(10, 49, 118, 49);
+            it.print(0, 51, id(FContent), "${NameMeterE_Ch03}");
+            it.printf(56, 51, id(FContent), "%3.0f", id(MeteringChipE_Ch03_voltage).state);
+            it.printf(92, 51, id(FContent), "%2.1f", id(MeteringChipE_Ch03_current).state);
+            break;
+
+          // This page shows the measure of chip F
+          case 5:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}16>18");
+            it.print(67, 2, id(FTitle), "V");
+            it.print(105, 2, id(FTitle), "A");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterF_Ch01}");
+            it.printf(56, 21, id(FContent), "%3.0f", id(MeteringChipF_Ch01_voltage).state);
+            it.printf(92, 21, id(FContent), "%2.1f", id(MeteringChipF_Ch01_current).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterF_Ch02}");
+            it.printf(56, 36, id(FContent), "%3.0f", id(MeteringChipF_Ch02_voltage).state);
+            it.printf(92, 36, id(FContent), "%2.1f", id(MeteringChipF_Ch02_current).state);
+            it.line(10, 49, 118, 49);
+            it.print(0, 51, id(FContent), "${NameMeterF_Ch03}");
+            it.printf(56, 51, id(FContent), "%3.0f", id(MeteringChipF_Ch03_voltage).state);
+            it.printf(92, 51, id(FContent), "%2.1f", id(MeteringChipF_Ch03_current).state);
+            break;
+
+          // This page shows the measure of chip A
+          case 6 ... 10:
+            if (id(display_page) >= 6 && id(display_page) < 10) {
+              id(display_page) = 10;
+            }
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}1>3");
+            it.print(95, 2, id(FTitle), "W");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterA_Ch01}");
+            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipA_Ch01_power).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterA_Ch02}");
+            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipA_Ch02_power).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterA_Ch03}");
+            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipA_Ch03_power).state);
+            break;
+
+          // This page shows the measure of chip B
+          case 11:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}4>6");
+            it.print(95, 2, id(FTitle), "W");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterB_Ch01}");
+            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipB_Ch01_power).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterB_Ch02}");
+            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipB_Ch02_power).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterB_Ch03}");
+            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipB_Ch03_power).state);
+            break;
+
+            break;
+
+          // This page shows the measure of chip C
+          case 12:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}7>9");
+            it.print(95, 2, id(FTitle), "W");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterC_Ch01}");
+            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipC_Ch01_power).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterC_Ch02}");
+            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipC_Ch02_power).state);
+            it.line(10, 49, 118, 49);
+            it.print(0, 51, id(FContent), "${NameMeterC_Ch03}");
+            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipC_Ch03_power).state);
+            break;
+
+          // This page shows the measure of chip D
+          case 13:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}10>12");
+            it.print(95, 2, id(FTitle), "W");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterD_Ch01}");
+            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipD_Ch01_power).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterD_Ch02}");
+            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipD_Ch02_power).state);
+            it.line(10, 49, 118, 49);
+            it.print(0, 51, id(FContent), "${NameMeterD_Ch03}");
+            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipD_Ch03_power).state);
+            break;
+
+          // This page shows the measure of chip E
+          case 14:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}13>15");
+            it.print(95, 2, id(FTitle), "W");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterE_Ch01}");
+            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipE_Ch01_power).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterE_Ch02}");
+            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipE_Ch02_power).state);
+            it.line(10, 49, 118, 49);
+            it.print(0, 51, id(FContent), "${NameMeterE_Ch03}");
+            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipE_Ch03_power).state);
+            break;
+
+          // This page shows the measure of chip F
+          case 15:
+            it.print(0, 2, id(FTitle), "${PageTitleMeasure}16>18");
+            it.print(95, 2, id(FTitle), "W");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterF_Ch01}");
+            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipF_Ch01_power).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterF_Ch02}");
+            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipF_Ch02_power).state);
+            it.line(10, 49, 118, 49);
+            it.print(0, 51, id(FContent), "${NameMeterF_Ch03}");
+            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipF_Ch03_power).state);
+            break;
+
+          // This page shows the total energy from electrical meter (TIC informations)
+          case 16 ... 20:
+            if (id(display_page) >= 16 && id(display_page) < 20) {
+              id(display_page) = 20;
+            }
+            it.print(0, 2, id(FTitle), "${PageTitleEnergy}");
+            it.print(102, 2, id(FTitle), "kWh");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FTitle), "HC");
+            it.printf(40, 21, id(FContent), "%10.0f", id(TIC_HCHC).state);
+            it.print(0, 36, id(FTitle), "HP");
+            it.printf(40, 36, id(FContent), "%10.0f", id(TIC_HCHP).state);
+            break;
+
+          // This page shows the total energy for chip A
+          case 21:
+            it.print(0, 2, id(FTitle), "${PageTitleEnergy}1>3");
+            it.print(92, 2, id(FTitle), "kWh/J");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterA_Ch01}");
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipA_Ch01_Energy).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterA_Ch02}");
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipA_Ch02_Energy).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterA_Ch03}");
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipA_Ch03_Energy).state);
+            break;
+
+          // This page shows the total energy for chip B
+          case 22:
+            it.print(0, 2, id(FTitle), "${PageTitleEnergy}4>6");
+            it.print(92, 2, id(FTitle), "kWh/J");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterB_Ch01}");
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipB_Ch01_Energy).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterB_Ch02}");
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipB_Ch02_Energy).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterB_Ch03}");
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipB_Ch03_Energy).state);
+
+            break;
+
+          // This page shows the total energy for chip C
+          case 23:
+            it.print(0, 2, id(FTitle), "${PageTitleEnergy}6>9");
+            it.print(92, 2, id(FTitle), "kWh/J");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterC_Ch01}");
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipC_Ch01_Energy).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterC_Ch02}");
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipC_Ch02_Energy).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterC_Ch03}");
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipC_Ch03_Energy).state);
+            break;
+
+          // This page shows the total energy for chip D
+          case 24:
+            it.print(0, 2, id(FTitle), "${PageTitleEnergy}9>12");
+            it.print(92, 2, id(FTitle), "kWh/J");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterD_Ch01}");
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipD_Ch01_Energy).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterD_Ch02}");
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipD_Ch02_Energy).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterD_Ch03}");
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipD_Ch03_Energy).state);
+            break;
+
+          // This page shows the total energy for chip E
+          case 25:
+            it.print(0, 2, id(FTitle), "${PageTitleEnergy}13>15");
+            it.print(92, 2, id(FTitle), "kWh/J");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterE_Ch01}");
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipE_Ch01_Energy).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterE_Ch02}");
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipE_Ch02_Energy).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterE_Ch03}");
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipE_Ch03_Energy).state);
+            break;
+
+          // This page shows the total energy for chip F
+          case 26:
+            it.print(0, 2, id(FTitle), "${PageTitleEnergy}16>18");
+            it.print(92, 2, id(FTitle), "kWh/J");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameMeterF_Ch01}");
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipF_Ch01_Energy).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameMeterF_Ch02}");
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipF_Ch02_Energy).state);
+            it.line(10, 49, 118, 49);
+            it.printf(0, 51, id(FContent), "${NameMeterF_Ch03}");
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipF_Ch03_Energy).state);
+            break;
+
+          // This page shows the 3 TOR counters data
+          case 27 ... 30:
+            if (id(display_page) >= 27 && id(display_page) < 30) {
+              id(display_page) = 30;
+            }
+            it.print(0, 2, id(FTitle), "${PageTitleCounter}");
+            it.print(32, 2, id(FTitle), "L/min");
+            it.print(80, 2, id(FTitle), "M3/J");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameCounterA}");
+            it.printf(50, 21, id(FContent), "%2.2f", id(counter_a).state);
+            it.printf(84, 21, id(FContent), "%5.2f", id(counter_a_total).state);
+            it.line(10, 34, 118, 34);
+            it.print(0, 36, id(FContent), "${NameCounterB}");
+            it.printf(50, 36, id(FContent), "%2.2f", id(counter_b).state);
+            it.printf(84, 36, id(FContent), "%5.3f", id(counter_b_total).state);
+            // Tip : add id(  . . ).state to forward the value to the display
+            // it.line(10, 49, 118, 49);
+            // it.print(0, 51, id(FContent), "${NameCounterC}");
+            // it.printf(50, 51, id(FContent), "%2.2f", counter_c);
+            // it.printf(80, 51, id(FContent), "%5.3f", counter_c_total);
+            break;
+
+          // This page shows the 2 multiusage I/O data
+          case 31 ... 40:
+            if (id(display_page) >= 31 && id(display_page) < 40) {
+              id(display_page) = 40;
+            }
+
+            it.print(0, 2, id(FTitle), "${PageTitleMultiusageIO_A}");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameIOA}");
+            it.printf(4, 33, id(FContent), "%6.2f %%", id(IOA_Humidity).state);
+            it.printf(62, 33, id(FContent), "%6.2f °C", id(IOA_Temperature).state);
+            break;
+
+          case 41:
+            it.print(0, 2, id(FTitle), "${PageTitleMultiusageIO_B}");
+            it.line(10, 19, 118, 19);
+            it.print(0, 20, id(FContent), "${NameIOB_01}");
+            it.printf(72, 20, id(FContent), "%6.2f °C", id(IOB_Temperature_01).state);
+            it.print(0, 31, id(FContent), "${NameIOB_02}");
+            it.printf(72, 31, id(FContent), "%6.2f °C", id(IOB_Temperature_02).state);
+            it.print(0, 42, id(FContent), "${NameIOB_03}");
+            it.printf(72, 42, id(FContent), "%6.2f °C", id(IOB_Temperature_03).state);
+            it.print(0, 53, id(FContent), "${NameIOB_04}");
+            it.printf(72, 53, id(FContent), "%6.2f °C", id(IOB_Temperature_04).state);
+            break;
+
+          // This page shows the system information
+          case 42 ... 90:
+            if (id(display_page) >= 42 && id(display_page) < 90) {
+              id(display_page) = 90;
+            }
+
+            it.print(0, 2, id(FTitle), "${PageTitleSystem}");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameIPAddr}");
+
+            if(strcmp(id(lan0_ip_addr).state.c_str(), "0.0.0.0") != 0) {
+              it.printf(25, 21, id(FContent), "%20s", id(lan0_ip_addr).state.c_str());
+            }
+            else {
+              it.printf(25, 21, id(FContent), "${Unconnected_Message}");
+            }
+
+            it.print(0, 33, id(FContent), "${NameMACAddr}");
+            it.printf(25, 33, id(FContent), "%20s", id(lan0_mac_addr).state.c_str());
+
+            it.line(10, 46, 118, 46);
+            it.print(0, 48, id(FContent), "${NameUptime}");
+            it.printf(25, 48, id(FContent), "%20s", id(sys_uptime_txt).state.c_str());
+
+            break;
+
+          case 91:
+            it.print(0, 2, id(FTitle), "${PageTitleTIC}");
+            it.print(82, 2, id(FTitle), "${NameTICCurrentD}");
+            it.line(10, 19, 118, 19);
+            it.print(0, 21, id(FContent), "${NameTICColor}");
+            it.printf(62, 21, id(FContent), "%6s", id(TIC_PTEC).state.c_str());
+            it.line(10, 46, 118, 46);
+            it.print(0, 48, id(FContent), "${NameTIC_ADCO}");
+            it.printf(0, 48, id(FContent), "%20s", id(TIC_ADCO).state.c_str());
+            break;
+         
+          // Turn off display
+          case -1:
+            id(onboard_display).clear();
+            break;
+
+          default:
+            id(display_page) = 0;
+            break;
+        }
+
+# Script section
+script:
+  # This script turn off backlight automaticatly
+  - id: display_backlight_auto_off_timer
+    then:
+      - delay: ${DisplayTurnOffDelay}
+      - light.turn_off:
+          id: display_backlight
+          transition_length: 5s
+      - lambda: |-
+          id(display_page)= -1;
+
+# Interval actions section
+interval:
+  # This interval is used for animating onboard LED in function of the tariff period
+  - interval: 10s
+    then:
+      - if:
+          condition:
+            lambda: 'return strcmp("HPJR",id(TIC_PTEC).state.c_str()) == 0 || strcmp("HP..",id(TIC_PTEC).state.c_str()) == 0;'
+          then:
+            - light.turn_on:
+                id: Status_LED
+                effect: "Red Purple Shading"
+      - if:
+          condition:
+            lambda: 'return strcmp("HCJR",id(TIC_PTEC).state.c_str()) == 0;'
+          then:
+            - light.turn_on:
+                id: Status_LED
+                effect: "Red Shading"
+      - if:
+          condition:
+            lambda: 'return strcmp("HPJB",id(TIC_PTEC).state.c_str()) == 0;'
+          then:
+            - light.turn_on:
+                id: Status_LED
+                effect: "Blue Purple Shading"
+      - if:
+          condition:
+            lambda: 'return strcmp("HCJB",id(TIC_PTEC).state.c_str()) == 0 || strcmp("HC..",id(TIC_PTEC).state.c_str()) == 0;'
+          then:
+            - light.turn_on:
+                id: Status_LED
+                effect: "Blue Shading"
+      - if:
+          condition:
+            lambda: 'return strcmp("HPJB",id(TIC_PTEC).state.c_str()) == 0;'
+          then:
+            - light.turn_on:
+                id: Status_LED
+                effect: "White Purple Shading"
+      - if:
+          condition:
+            lambda: 'return strcmp("HCJB",id(TIC_PTEC).state.c_str()) == 0;'
+          then:
+            - light.turn_on:
+                id: Status_LED
+                effect: "White Shading"
