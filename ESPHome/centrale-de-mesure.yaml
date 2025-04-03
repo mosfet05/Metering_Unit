@@ -52,7 +52,8 @@ substitutions:
   NameVoltage: "Tension"
   NameIntensity: "Courant"
   NamePower: "Puissance"
-  Name_Energy: "Energie"
+  Name_Energy_Total: "Energie"
+  Name_Energy_Day: "Energie jour"
   NameInstFlow: "Debit instantane"
   NameTotal: "Total"
   NameCmdCalibration: "Calibrer"
@@ -71,14 +72,13 @@ substitutions:
   Name_Cmd_Restart: "Redemarrer"
 
   # TIC label
-  NameTIC_ADCO: "PDL"
+  NameTIC_PDL: "PDL"
   NameTICCurrentD: "En cours"
   NameTICNextD: "Demain"
   NameTICColor: "Couleur"
   NameTICBlueD: "Bleu"
   NameTICWhiteD: "Blanc"
   NameTICRedD: "Rouge"
-  NameTICPTEC: "Rouge"
 
   # Power meters name
   NameMeterA: "Mesures 1>3"
@@ -121,13 +121,39 @@ substitutions:
   NameIOB_04: "Cellier"
 
   #Linky name
-  Name_Linky_PTEC: "Linky Periode Tarifaire"
-  Name_Linky_ADCO: "Linky Adresse"
+  Name_Linky_LTARF: "Linky Periode Tarifaire"
+  Name_Linky_NTARF: "Linky Num. Periode Tarifaire"
   Name_Linky_HCHC: "Linky Index HC"
   Name_Linky_HCHP: "Linky Index HP"
-  Name_Linky_IINST: "Linky Intensite instantannee"
-  Name_Linky_PAPP: "Linky Puissance Apparente Instantanee Soutiree"
-  Name_Linky_MOTDETAT: "Linky Mot d'etat"
+  Name_Linky_IRMS1: "Linky Intensite"
+  Name_Linky_URMS1: "Linky Tension"
+  Name_Linky_SINSTS: "Linky Puissance Apparente"
+  Name_Linky_DATE: "Linky Horodateur"
+  Name_Linky_MSG1: "Linky Message Court"
+  Name_Linky_MSG2: "Linky Message Ultra-Court"
+  Name_Linky_PRM: "Linky PDL (PRM)"
+  Name_Linky_ADSC: "Linky ADSC"
+  Name_Linky_RELAIS: "Linky Relais"
+  Name_Linky_NGTF: "Linky Contrat"
+  Name_Linky_STATUS_cs: "Linky contact"
+  Name_Linky_STATUS_Ecbd: "Linky cache-bornes distributeur"
+  Name_Linky_STATUS_Sp: "Linky surtension"
+  Name_Linky_STATUS_Dpr: "Linky dépassement puissance"
+  Name_Linky_STATUS_Fpc: "Linky mode producteur"
+  Name_Linky_STATUS_Sea: "Linky sens de l'énegie active"
+  Name_Linky_STATUS_Hd: "Linky Horloge dégradée"
+  Name_Linky_STATUS_Sti: "Linky mode TIC"
+  Name_Linky_STATUS_SyC: "Linky synchronisation"
+  Name_Linky_STATUS_Odc: "Linky Organe de coupure"
+  Name_Linky_STATUS_Teccf: "Linky Tarif en cours fournisseur"
+  Name_Linky_STATUS_Teccd: "Linky Tarif en cours distributeur"
+  Name_Linky_STATUS_ScE: "Linky État de la sortie communication Enedis"
+  Name_Linky_STATUS_SdC: "Linky Statut du CPL"
+  Name_Linky_STATUS_CjT: "Linky Couleur du jour tempo"
+  Name_Linky_STATUS_ClT: "Linky Couleur du lendemain tempo"
+  Name_Linky_STATUS_Ppm: "Linky Préavis pointes mobiles"
+  Name_Linky_STATUS_Pm: "Linky Pointe mobile"
+
 
   # Parameters
   DisplayTurnOffDelay: 10min
@@ -190,7 +216,7 @@ esp32:
 
 # Enable logging
 logger:
-    level: ERROR
+    level: WARN
 
 # Only 3 attemp for finding devices before rolling back in safe mode
 safe_mode:
@@ -302,7 +328,7 @@ spi:
 uart:
   - id: uart_TIC
     rx_pin: ${GPIO_TIC_RX}
-    baud_rate: 1200 # 9600 == mode standard, 1200 == mode historique
+    baud_rate: 9600 # 9600 == mode standard, 1200 == mode historique
     parity: EVEN
     data_bits: 7
     stop_bits: 1
@@ -310,8 +336,8 @@ uart:
 # Linky TIC configuration
 teleinfo:
   - id: TIC_Teleinfo
-    historical_mode: True
-    update_interval: 2s
+    historical_mode: False
+    update_interval: 1s
     uart_id: uart_TIC
 
 # One wire configuration on I/O B
@@ -361,6 +387,10 @@ sensor:
         id: MeteringChipA_Ch01_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_A
 
@@ -369,15 +399,19 @@ sensor:
         id: MeteringChipA_Ch01_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_A
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterA_Ch01}
-        id: MeteringChipA_Ch01_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterA_Ch01}
+        id: MeteringChipA_Ch01_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_A
       
@@ -399,6 +433,10 @@ sensor:
         id: MeteringChipA_Ch02_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_A
 
@@ -407,15 +445,19 @@ sensor:
         id: MeteringChipA_Ch02_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_A
 
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterA_Ch02}
-        id: MeteringChipA_Ch02_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterA_Ch02}
+        id: MeteringChipA_Ch02_Energy 
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_A
       
@@ -437,6 +479,10 @@ sensor:
         id: MeteringChipA_Ch03_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_A
         
@@ -445,15 +491,19 @@ sensor:
         id: MeteringChipA_Ch03_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_A
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterA_Ch03}
-        id: MeteringChipA_Ch03_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterA_Ch03}
+        id: MeteringChipA_Ch03_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_A
       
@@ -508,6 +558,10 @@ sensor:
         id: MeteringChipB_Ch01_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_B
       
@@ -516,16 +570,19 @@ sensor:
         id: MeteringChipB_Ch01_power
         device_class: power
         state_class: measurement
-
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_B
 
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterB_Ch01}
-        id: MeteringChipB_Ch01_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterB_Ch01}
+        id: MeteringChipB_Ch01_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_B
       
@@ -547,6 +604,10 @@ sensor:
         id: MeteringChipB_Ch02_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_B
       
@@ -555,15 +616,19 @@ sensor:
         id: MeteringChipB_Ch02_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_B
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterB_Ch02}
-        id: MeteringChipB_Ch02_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterB_Ch02}
+        id: MeteringChipB_Ch02_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_B
       
@@ -585,6 +650,10 @@ sensor:
         id: MeteringChipB_Ch03_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_B
       
@@ -593,15 +662,19 @@ sensor:
         id: MeteringChipB_Ch03_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_B
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterB_Ch03}
-        id: MeteringChipB_Ch03_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterB_Ch03}
+        id: MeteringChipB_Ch03_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_B
 
@@ -656,6 +729,10 @@ sensor:
         id: MeteringChipC_Ch01_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_C
       
@@ -664,15 +741,19 @@ sensor:
         id: MeteringChipC_Ch01_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_C
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterC_Ch01}
-        id: MeteringChipC_Ch01_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterC_Ch01}
+        id: MeteringChipC_Ch01_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_C
       
@@ -694,6 +775,10 @@ sensor:
         id: MeteringChipC_Ch02_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_C
       
@@ -702,15 +787,19 @@ sensor:
         id: MeteringChipC_Ch02_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_C
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterC_Ch02}
-        id: MeteringChipC_Ch02_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterC_Ch02}
+        id: MeteringChipC_Ch02_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_C
       
@@ -732,6 +821,10 @@ sensor:
         id: MeteringChipC_Ch03_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_C
       
@@ -740,15 +833,19 @@ sensor:
         id: MeteringChipC_Ch03_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_C
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterC_Ch03}
-        id: MeteringChipC_Ch03_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterC_Ch03}
+        id: MeteringChipC_Ch03_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_C
       
@@ -802,6 +899,10 @@ sensor:
         id: MeteringChipD_Ch01_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_D
       
@@ -810,15 +911,19 @@ sensor:
         id: MeteringChipD_Ch01_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_D
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterD_Ch01}
-        id: MeteringChipD_Ch01_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterD_Ch01}
+        id: MeteringChipD_Ch01_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_D
       
@@ -840,6 +945,10 @@ sensor:
         id: MeteringChipD_Ch02_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_D
       
@@ -848,15 +957,19 @@ sensor:
         id: MeteringChipD_Ch02_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_D
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterD_Ch02}
-        id: MeteringChipD_Ch02_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterD_Ch02}
+        id: MeteringChipD_Ch02_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_D
      
@@ -878,6 +991,10 @@ sensor:
         id: MeteringChipD_Ch03_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_D
       
@@ -886,15 +1003,19 @@ sensor:
         id: MeteringChipD_Ch03_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_D
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterD_Ch03}
-        id: MeteringChipD_Ch03_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterD_Ch03}
+        id: MeteringChipD_Ch03_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_D
       
@@ -949,6 +1070,10 @@ sensor:
         id: MeteringChipE_Ch01_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_E
 
@@ -957,15 +1082,19 @@ sensor:
         id: MeteringChipE_Ch01_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_E
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterE_Ch01}
-        id: MeteringChipE_Ch01_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterE_Ch01}
+        id: MeteringChipE_Ch01_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_E
       
@@ -987,6 +1116,10 @@ sensor:
         id: MeteringChipE_Ch02_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_E
       
@@ -995,15 +1128,19 @@ sensor:
         id: MeteringChipE_Ch02_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_E
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterE_Ch02}
-        id: MeteringChipE_Ch02_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterE_Ch02}
+        id: MeteringChipE_Ch02_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_E
       
@@ -1025,6 +1162,10 @@ sensor:
         id: MeteringChipE_Ch03_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_E
       
@@ -1033,15 +1174,19 @@ sensor:
         id: MeteringChipE_Ch03_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_E
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterE_Ch03}
-        id: MeteringChipE_Ch03_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterE_Ch03}
+        id: MeteringChipE_Ch03_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_E
       
@@ -1096,6 +1241,10 @@ sensor:
         id: MeteringChipF_Ch01_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_F
       
@@ -1104,15 +1253,19 @@ sensor:
         id: MeteringChipF_Ch01_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_F
 
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterF_Ch01}
-        id: MeteringChipF_Ch01_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterF_Ch01}
+        id: MeteringChipF_Ch01_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_F
       
@@ -1134,6 +1287,10 @@ sensor:
         id: MeteringChipF_Ch02_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_F
       
@@ -1142,15 +1299,19 @@ sensor:
         id: MeteringChipF_Ch02_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_F
 
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterF_Ch02}
-        id: MeteringChipF_Ch02_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterF_Ch02}
+        id: MeteringChipF_Ch02_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_F
 
@@ -1172,6 +1333,10 @@ sensor:
         id: MeteringChipF_Ch03_current
         device_class: current
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_F
       
@@ -1180,15 +1345,19 @@ sensor:
         id: MeteringChipF_Ch03_power
         device_class: power
         state_class: measurement
+        filters:
+          - clamp: 
+              min_value: 0.0
+              ignore_out_of_range: false
         web_server:
           sorting_group_id: sorting_group_meter_F
       
       forward_active_energy:
-        internal: True
-        name: ${Name_Energy} ${NameMeterF_Ch03}
-        id: MeteringChipF_Ch03_forward_p_energy
+        name: ${Name_Energy_Total} ${NameMeterF_Ch03}
+        id: MeteringChipF_Ch03_Energy
         device_class: energy
-        state_class: total
+        state_class: total_increasing
+        unit_of_measurement: 'Wh'
         web_server:
           sorting_group_id: sorting_group_meter_F
       
@@ -1328,11 +1497,11 @@ sensor:
   # web_server:
   #   sorting_group_id: sorting_group_meter_Counter
 
-  # Total energy for meter chip A
+  # Daily energy for meter chip A
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterA_Ch01}
-    power_id: MeteringChipA_Ch01_forward_p_energy
-    id: MeteringChipA_Ch01_Energy
+    name: ${Name_Energy_Day} ${NameMeterA_Ch01}
+    power_id: MeteringChipA_Ch01_power
+    id: MeteringChipA_Ch01_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1342,9 +1511,9 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterA_Ch02}
-    power_id: MeteringChipA_Ch02_forward_p_energy
-    id: MeteringChipA_Ch02_Energy
+    name: ${Name_Energy_Day} ${NameMeterA_Ch02}
+    power_id: MeteringChipA_Ch02_power
+    id: MeteringChipA_Ch02_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1354,9 +1523,9 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterA_Ch03}
-    power_id: MeteringChipA_Ch03_forward_p_energy
-    id: MeteringChipA_Ch03_Energy
+    name: ${Name_Energy_Day} ${NameMeterA_Ch03}
+    power_id: MeteringChipA_Ch03_power
+    id: MeteringChipA_Ch03_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1365,23 +1534,11 @@ sensor:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001
 
-  # Total energy for meter chip B
+  # Daily energy for meter chip B
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterB_Ch01}
-    power_id: MeteringChipB_Ch01_forward_p_energy
-    id: MeteringChipB_Ch01_Energy
-    unit_of_measurement: 'kWh'
-    state_class: total_increasing
-    device_class: energy
-    accuracy_decimals: 3
-    filters:
-      # Multiplication factor from W to kW is 0.001
-      - multiply: 0.001
-
-  - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterB_Ch02}
-    power_id: MeteringChipB_Ch02_forward_p_energy
-    id: MeteringChipB_Ch02_Energy
+    name: ${Name_Energy_Day} ${NameMeterB_Ch01}
+    power_id: MeteringChipB_Ch01_power
+    id: MeteringChipB_Ch01_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1391,9 +1548,21 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterB_Ch03}
-    power_id: MeteringChipB_Ch03_forward_p_energy
-    id: MeteringChipB_Ch03_Energy
+    name: ${Name_Energy_Day} ${NameMeterB_Ch02}
+    power_id: MeteringChipB_Ch02_power
+    id: MeteringChipB_Ch02_Energy_Daily
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy_Day} ${NameMeterB_Ch03}
+    power_id: MeteringChipB_Ch03_power
+    id: MeteringChipB_Ch03_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1402,11 +1571,11 @@ sensor:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001
   
-  # Total energy for meter chip C
+  # Daily energy for meter chip C
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterC_Ch01}
-    power_id: MeteringChipC_Ch01_forward_p_energy
-    id: MeteringChipC_Ch01_Energy
+    name: ${Name_Energy_Day} ${NameMeterC_Ch01}
+    power_id: MeteringChipC_Ch01_power
+    id: MeteringChipC_Ch01_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1416,9 +1585,9 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterC_Ch02}
-    power_id: MeteringChipC_Ch02_forward_p_energy
-    id: MeteringChipC_Ch02_Energy
+    name: ${Name_Energy_Day} ${NameMeterC_Ch02}
+    power_id: MeteringChipC_Ch02_power
+    id: MeteringChipC_Ch02_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1428,9 +1597,9 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterC_Ch03}
-    power_id: MeteringChipC_Ch03_forward_p_energy
-    id: MeteringChipC_Ch03_Energy
+    name: ${Name_Energy_Day} ${NameMeterC_Ch03}
+    power_id: MeteringChipC_Ch03_power
+    id: MeteringChipC_Ch03_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1439,23 +1608,11 @@ sensor:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001
 
-  # Total energy for meter chip D
+  # Daily energy for meter chip D
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterD_Ch01}
-    power_id: MeteringChipD_Ch01_forward_p_energy
-    id: MeteringChipD_Ch01_Energy
-    unit_of_measurement: 'kWh'
-    state_class: total_increasing
-    device_class: energy
-    accuracy_decimals: 3
-    filters:
-      # Multiplication factor from W to kW is 0.001
-      - multiply: 0.001
-
-  - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterD_Ch02}
-    power_id: MeteringChipD_Ch02_forward_p_energy
-    id: MeteringChipD_Ch02_Energy
+    name: ${Name_Energy_Day} ${NameMeterD_Ch01}
+    power_id: MeteringChipD_Ch01_power
+    id: MeteringChipD_Ch01_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1465,22 +1622,9 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterD_Ch03}
-    power_id: MeteringChipD_Ch03_forward_p_energy
-    id: MeteringChipD_Ch03_Energy
-    unit_of_measurement: 'kWh'
-    state_class: total_increasing
-    device_class: energy
-    accuracy_decimals: 3
-    filters:
-      # Multiplication factor from W to kW is 0.001
-      - multiply: 0.001
-
-  # Total energy for meter chip E
-  - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterE_Ch01}
-    power_id: MeteringChipE_Ch01_forward_p_energy
-    id: MeteringChipE_Ch01_Energy
+    name: ${Name_Energy_Day} ${NameMeterD_Ch02}
+    power_id: MeteringChipD_Ch02_power
+    id: MeteringChipD_Ch02_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1490,9 +1634,22 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterE_Ch02}
-    power_id: MeteringChipE_Ch02_forward_p_energy
-    id: MeteringChipE_Ch02_Energy
+    name: ${Name_Energy_Day} ${NameMeterD_Ch03}
+    power_id: MeteringChipD_Ch03_power
+    id: MeteringChipD_Ch03_Energy_Daily
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  # Daily energy for meter chip E
+  - platform: total_daily_energy
+    name: ${Name_Energy_Day} ${NameMeterE_Ch01}
+    power_id: MeteringChipE_Ch01_power
+    id: MeteringChipE_Ch01_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1502,22 +1659,9 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterE_Ch03}
-    power_id: MeteringChipE_Ch03_forward_p_energy
-    id: MeteringChipE_Ch03_Energy
-    unit_of_measurement: 'kWh'
-    state_class: total_increasing
-    device_class: energy
-    accuracy_decimals: 3
-    filters:
-      # Multiplication factor from W to kW is 0.001
-      - multiply: 0.001
-
-  # Total energy for meter chip F
-  - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterF_Ch01}
-    power_id: MeteringChipF_Ch01_forward_p_energy
-    id: MeteringChipF_Ch01_Energy
+    name: ${Name_Energy_Day} ${NameMeterE_Ch02}
+    power_id: MeteringChipE_Ch02_power
+    id: MeteringChipE_Ch02_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1527,9 +1671,22 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterF_Ch02}
-    power_id: MeteringChipF_Ch02_forward_p_energy
-    id: MeteringChipF_Ch02_Energy
+    name: ${Name_Energy_Day} ${NameMeterE_Ch03}
+    power_id: MeteringChipE_Ch03_power
+    id: MeteringChipE_Ch03_Energy_Daily
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  # Daily energy for meter chip F
+  - platform: total_daily_energy
+    name: ${Name_Energy_Day} ${NameMeterF_Ch01}
+    power_id: MeteringChipF_Ch01_power
+    id: MeteringChipF_Ch01_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1539,9 +1696,21 @@ sensor:
       - multiply: 0.001
 
   - platform: total_daily_energy
-    name: ${Name_Energy} ${NameMeterF_Ch03}
-    power_id: MeteringChipF_Ch03_forward_p_energy
-    id: MeteringChipF_Ch03_Energy
+    name: ${Name_Energy_Day} ${NameMeterF_Ch02}
+    power_id: MeteringChipF_Ch02_power
+    id: MeteringChipF_Ch02_Energy_Daily
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: ${Name_Energy_Day} ${NameMeterF_Ch03}
+    power_id: MeteringChipF_Ch03_power
+    id: MeteringChipF_Ch03_Energy_Daily
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
@@ -1735,7 +1904,7 @@ sensor:
   # Linky HC index
   - platform: teleinfo
     id: TIC_HCHC
-    tag_name: "HCHC"
+    tag_name: "EASF01"
     name: ${Name_Linky_HCHC}
     unit_of_measurement: "Wh"
     icon: mdi:flash
@@ -1748,7 +1917,7 @@ sensor:
   # Linky HP index
   - platform: teleinfo
     id: TIC_HCHP
-    tag_name: "HCHP"
+    tag_name: "EASF02"
     name: ${Name_Linky_HCHP}
     unit_of_measurement: "Wh"
     icon: mdi:flash
@@ -1758,11 +1927,22 @@ sensor:
     web_server:
       sorting_group_id: sorting_group_TIC
 
+  # Linky voltage
+  - platform: teleinfo
+    id: TIC_URMS1
+    tag_name: "URMS1"
+    name: ${Name_Linky_URMS1}
+    unit_of_measurement: V
+    device_class: voltage
+    state_class: measurement
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
   # Linky intensity
   - platform: teleinfo
     id: TIC_IRMS1
-    tag_name: "IINST"
-    name: ${Name_Linky_IINST}
+    tag_name: "IRMS1"
+    name: ${Name_Linky_IRMS1}
     unit_of_measurement: A
     device_class: current
     state_class: measurement
@@ -1771,99 +1951,25 @@ sensor:
 
   # Linky apparent power
   - platform: teleinfo
-    id: TIC_PAPP
-    tag_name: "PAPP"
-    name: ${Name_Linky_PAPP}
+    id: TIC_SINSTS
+    tag_name: "SINSTS"
+    name: ${Name_Linky_SINSTS}
     unit_of_measurement: VA
     state_class: measurement
     device_class: apparent_power
     web_server:
       sorting_group_id: sorting_group_TIC
 
-  # Index option Tempo
-  #- platform: teleinfo
-  #  id: TIC_BBRHCJB
-  #  tag_name: "BBRHCJB"
-  #  name: "Linky Index Tempo Bleu HC"
-  #  unit_of_measurement: kWh
-  #  device_class: energy
-  #  state_class: total_increasing
-  #  accuracy_decimals: 3
-  #  filters:
-  #    - multiply: 0.001
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
-
-  #- platform: teleinfo
-  #  id: TIC_BBRHPJB
-  #  tag_name: "BBRHPJB"
-  #  name: "Linky Index Tempo Bleu HP"
-  #  unit_of_measurement: kWh
-  #  device_class: energy
-  #  state_class: total_increasing
-  #  accuracy_decimals: 3
-  #  filters:
-  #    - multiply: 0.001
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
-
-  #- platform: teleinfo
-  #  id: TIC_BBRHCJW
-  #  tag_name: "BBRHCJW"
-  #  name: "Linky Index Tempo Blanc HC"
-  #  unit_of_measurement: kWh
-  #  device_class: energy
-  #  state_class: total_increasing
-  #  accuracy_decimals: 3
-  #  filters:
-  #    - multiply: 0.001
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
-
-  #- platform: teleinfo
-  #  id: TIC_BBRHPJW
-  #  tag_name: "BBRHPJW"
-  #  name: "Linky Index Tempo Blanc HP"
-  #  unit_of_measurement: kWh
-  #  device_class: energy
-  #  state_class: total_increasing
-  #  accuracy_decimals: 3
-  #  filters:
-  #    - multiply: 0.001
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
-
-  #- platform: teleinfo
-  #  id: TIC_BBRHCJR
-  #  tag_name: "BBRHCJR"
-  #  name: "Linky Index Tempo Rouge HC"
-  #  unit_of_measurement: kWh
-  #  device_class: energy
-  #  state_class: total_increasing
-  #  accuracy_decimals: 3
-  #  filters:
-  #    - multiply: 0.001
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
-
-  #- platform: teleinfo
-  #  id: TIC_BBRHPJR
-  #  tag_name: "BBRHPJR"
-  #  name: "Linky Index Tempo Rouge HP"
-  #  unit_of_measurement: kWh
-  #  device_class: energy
-  #  state_class: total_increasing
-  #  accuracy_decimals: 3
-  #  filters:
-  #    - multiply: 0.001
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
+  # Linky tariff period
+  - platform: teleinfo
+    id: TIC_NTARF
+    tag_name: "NTARF"
+    name: ${Name_Linky_NTARF}
+    device_class: ""
+    unit_of_measurement: ""
+    icon: mdi:progress-clock
+    web_server:
+      sorting_group_id: sorting_group_TIC
 
 text_sensor:
   # Ethernet addresses
@@ -1871,9 +1977,13 @@ text_sensor:
     ip_address:
       name: ${NameIPAddr}
       id: lan0_ip_addr
+      web_server:
+        sorting_group_id: sorting_group_System
     mac_address:
       name: ${NameMACAddr}
       id: lan0_mac_addr
+      web_server:
+        sorting_group_id: sorting_group_System
   
   - platform: template
     name: ${NameUptime}
@@ -1899,68 +2009,228 @@ text_sensor:
         uptime_str = to_string(seconds) +"s";
       }
       return uptime_str;
-                                                                                                                                
-  # Libelle tarif fournisseur en cours !!! INUTILE !!!
-  #- platform: teleinfo
-  #  id: TIC_LTARF
-  #  tag_name: "LTARF"
-  #  name: "Linky Tarif Actuel"
-  #  icon: mdi:information
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
+    web_server:
+      sorting_group_id: sorting_group_System
 
   # Linky address (also known as "Point De Livraison")
   - platform: teleinfo
-    id: TIC_ADCO
-    tag_name: "ADCO"
-    name: ${Name_Linky_ADCO}
+    id: TIC_PRM
+    tag_name: "PRM"
+    name: ${Name_Linky_PRM}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  - platform: teleinfo
+    id: TIC_ADSC
+    tag_name: "ADSC"
+    name: ${Name_Linky_ADSC}
     web_server:
       sorting_group_id: sorting_group_TIC
 
   # Linky tariff period
   - platform: teleinfo
-    id: TIC_PTEC
-    tag_name: "PTEC"
-    name: ${Name_Linky_PTEC}
+    id: TIC_LTARF
+    tag_name: "LTARF"
+    name: ${Name_Linky_LTARF}
+    icon: mdi:progress-clock
     web_server:
       sorting_group_id: sorting_group_TIC
 
-  # Couleur du lendemain
-  #- platform: teleinfo
-  #  id: TIC_DEMAIN
-  #  tag_name: "DEMAIN"
-  #  name: "Linky Couleur Demain"
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
-
-  # Horaire Heures Pleines Heures Creuses !!! INUTILE !!!
-  #- platform: teleinfo
-  #  id: TIC_HHPHC
-  #  tag_name: "HHPHC"
-  #  name: "Linky Horaire HP/HC"
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
-
-  # Status word of Linky meter
   - platform: teleinfo
-    id: TIC_MOTDETAT
-    tag_name: "MOTDETAT"
-    name: ${Name_Linky_MOTDETAT}
-
+    id: TIC_DATE_Txt
+    tag_name: "DATE"
+    internal: True
+    name: ${Name_Linky_DATE}
+    filters: 
+      - lambda: |-
+          std::string ss = x + "00000000000000";
+          std::string res = "20"+ss.substr(1,2)+"-"+ss.substr(3,2)+"-"+ss.substr(5,2)+" "+ss.substr(7,2)+":"+ss.substr(9,2)+":"+ss.substr(11,2);
+          auto call = id(TIC_DATE).make_call();
+          call.set_datetime(res);
+          call.perform();
+          return res;
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  # Message court
+  - platform: teleinfo
+    id: TIC_MSG1
+    tag_name: "MSG1"
+    name: ${Name_Linky_MSG1}
     web_server:
       sorting_group_id: sorting_group_TIC
 
-  # Presence des potentiels !!! INUTILE !!!
-  #- platform: teleinfo
-  #  id: TIC_PPOT
-  #  tag_name: "PPOT"
-  #  name: "Linky Presence Potentiels"
-  #
-  # web_server:
-  #   sorting_group_id: sorting_group_TIC
+  # Message Ultra court
+  - platform: teleinfo
+    id: TIC_MSG2
+    tag_name: "MSG2"
+    name: ${Name_Linky_MSG2}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  # Relais
+  - platform: teleinfo
+    id: TIC_RELAIS
+    tag_name: "RELAIS"
+    name: ${Name_Linky_RELAIS}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+  # Contrat
+  - platform: teleinfo
+    id: TIC_NGTF
+    tag_name: "NGTF"
+    name: ${Name_Linky_NGTF}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+  - platform: teleinfo
+    id: TIC_STATUS_STGE
+    tag_name: "STGE"
+    name: "Linky Registre de Statuts"
+    icon: mdi:information
+    internal: True
+    on_value:
+      then:
+        - lambda: |-
+            std::bitset<32> stge = std::bitset<32>(strtol(id(TIC_STATUS_STGE).state.c_str(), NULL, 16));      
+            id(TIC_STATUS_cs).publish_state(stge[0] == 1);
+            switch( stge[3] << 4 | stge[2] << 2 |  stge[1]) {
+              case 0x0: id(TIC_STATUS_Odc).publish_state("Fermé"); break;
+              case 0x1: id(TIC_STATUS_Odc).publish_state("Ouvert sur surpuissance"); break;
+              case 0x2: id(TIC_STATUS_Odc).publish_state("Ouvert sur surtension"); break;
+              case 0x3: id(TIC_STATUS_Odc).publish_state("Ouvert sur délestage"); break;
+              case 0x4: id(TIC_STATUS_Odc).publish_state("Ouvert sur ordre CPL ou Euridis"); break;
+              case 0x5: id(TIC_STATUS_Odc).publish_state("Ouvert sur une surchauffe avec une valeur du courant supérieure au courant de commutation maximal"); break;
+              case 0x6: id(TIC_STATUS_Odc).publish_state("Ouvert sur une surchauffe avec une valeur de courant inférieure au courant de commutation maximal"); break;
+            }
+            id(TIC_STATUS_Ecbd).publish_state(stge[4] == 1);
+            id(TIC_STATUS_Sp).publish_state(stge[6] == 1);
+            id(TIC_STATUS_Dpr).publish_state(stge[7] == 1);
+            id(TIC_STATUS_Fpc).publish_state(stge[8] == 1);
+            id(TIC_STATUS_Sea).publish_state(stge[9] == 1);
+            switch( stge[13] << 8 | stge[12] << 4 | stge[11] << 2 |  stge[10]) {
+              case 0x0: id(TIC_STATUS_Teccf).publish_state("Énergie Index 1"); break;
+              case 0x1: id(TIC_STATUS_Teccf).publish_state("Énergie Index 2"); break;
+              case 0x2: id(TIC_STATUS_Teccf).publish_state("Énergie Index 3"); break;
+              case 0x3: id(TIC_STATUS_Teccf).publish_state("Énergie Index 4"); break;
+              case 0x4: id(TIC_STATUS_Teccf).publish_state("Énergie Index 5"); break;
+              case 0x5: id(TIC_STATUS_Teccf).publish_state("Énergie Index 6"); break;
+              case 0x6: id(TIC_STATUS_Teccf).publish_state("Énergie Index 7"); break;
+              case 0x7: id(TIC_STATUS_Teccf).publish_state("Énergie Index 8"); break;
+              case 0x8: id(TIC_STATUS_Teccf).publish_state("Énergie Index 9"); break;
+              case 0x9: id(TIC_STATUS_Teccf).publish_state("Énergie Index 10"); break;
+            } 
+            switch( stge[15] << 2 | stge[14]) { 
+              case 0x0: id(TIC_STATUS_Teccd).publish_state("Énergie Index 1"); break;
+              case 0x1: id(TIC_STATUS_Teccd).publish_state("Énergie Index 2"); break;
+              case 0x2: id(TIC_STATUS_Teccd).publish_state("Énergie Index 3"); break;
+              case 0x3: id(TIC_STATUS_Teccd).publish_state("Énergie Index 4"); break;
+            } 
+            id(TIC_STATUS_Hd).publish_state(stge[16] == 1);
+            id(TIC_STATUS_Sti).publish_state(stge[17] == 1);
+            switch( stge[20] << 2 | stge[19]) { 
+              case 0x0: id(TIC_STATUS_ScE).publish_state("Désactivée"); break;
+              case 0x1: id(TIC_STATUS_ScE).publish_state("Activée sans sécurité"); break;
+              case 0x3: id(TIC_STATUS_ScE).publish_state("Activée avec sécurité"); break;
+            }
+            switch( stge[22] << 2 | stge[21]) { 
+              case 0x0: id(TIC_STATUS_SdC).publish_state("New/Unlock"); break;
+              case 0x1: id(TIC_STATUS_SdC).publish_state("New/Lock"); break;
+              case 0x2: id(TIC_STATUS_SdC).publish_state("Registered"); break;
+            }
+            id(TIC_STATUS_SyC).publish_state(stge[23] == 1);
+            switch( stge[25] << 2 | stge[24]) { 
+              case 0x0: id(TIC_STATUS_CjT).publish_state("Pas d'annonce"); break;
+              case 0x1: id(TIC_STATUS_CjT).publish_state("Bleu"); break;
+              case 0x2: id(TIC_STATUS_CjT).publish_state("Blanc"); break;
+              case 0x3: id(TIC_STATUS_CjT).publish_state("Rouge"); break;
+            }
+            switch( stge[27] << 2 | stge[26]) {
+              case 0x0: id(TIC_STATUS_ClT).publish_state("Pas d'annonce"); break;
+              case 0x1: id(TIC_STATUS_ClT).publish_state("Bleu"); break;
+              case 0x2: id(TIC_STATUS_ClT).publish_state("Blanc"); break;
+              case 0x3: id(TIC_STATUS_ClT).publish_state("Rouge"); break;
+            }
+            switch( stge[29] << 2 | stge[28]) {
+              case 0x0: id(TIC_STATUS_Ppm).publish_state("Pas de préavis en cours"); break;
+              case 0x1: id(TIC_STATUS_Ppm).publish_state("Préavis PM1 en cours"); break;
+              case 0x2: id(TIC_STATUS_Ppm).publish_state("Préavis PM2 en cours"); break;
+              case 0x3: id(TIC_STATUS_Ppm).publish_state("Préavis PM3 en cours"); break;
+            }
+            switch( stge[31] << 2 | stge[30]) {
+              case 0x0: id(TIC_STATUS_Pm).publish_state("Pas de pointe mobile"); break;
+              case 0x1: id(TIC_STATUS_Pm).publish_state("PM1 en cours"); break;
+              case 0x2: id(TIC_STATUS_Pm).publish_state("PM2 en cours"); break;
+              case 0x3: id(TIC_STATUS_Pm).publish_state("PM3 en cours"); break;
+            }
+    web_server:
+      sorting_group_id: sorting_group_TIC
+    
+  - platform: template
+    id: TIC_STATUS_Odc
+    name: ${Name_Linky_STATUS_Odc}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    id: TIC_STATUS_Teccf
+    name: ${Name_Linky_STATUS_Teccf}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    id: TIC_STATUS_Teccd
+    name: ${Name_Linky_STATUS_Teccd}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    id: TIC_STATUS_ScE
+    name: ${Name_Linky_STATUS_ScE}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    id: TIC_STATUS_SdC
+    name: ${Name_Linky_STATUS_SdC}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    id: TIC_STATUS_CjT
+    name: ${Name_Linky_STATUS_CjT}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    id: TIC_STATUS_ClT
+    name: ${Name_Linky_STATUS_ClT}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    id: TIC_STATUS_Ppm
+    name: ${Name_Linky_STATUS_Ppm}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    id: TIC_STATUS_Pm
+    name: ${Name_Linky_STATUS_Pm}
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
+datetime:
+  # Linky Date and time
+  - platform: template
+    id: TIC_DATE
+    type: datetime
+    name: ${Name_Linky_DATE}
+    entity_category: DIAGNOSTIC
+    optimistic: yes
+    web_server:
+      sorting_group_id: sorting_group_TIC
+
 button:
   # ESP32 restart
   - platform: restart
@@ -2129,6 +2399,80 @@ binary_sensor:
               - light.turn_on:
                   id: display_backlight
                   brightness: 100%
+  
+  # Linky State
+  - platform: template
+    name: ${Name_Linky_STATUS_cs}
+    id: TIC_STATUS_cs
+    # 0 = fermé
+    # 1 = ouvert
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    name: ${Name_Linky_STATUS_Ecbd}
+    id: TIC_STATUS_Ecbd
+    # 0 = fermé
+    # 1 = ouvert
+    web_server:
+      sorting_group_id: sorting_group_TIC
+   
+  - platform: template
+    name: ${Name_Linky_STATUS_Sp}
+    id: TIC_STATUS_Sp 
+    # 0 = pas de surtension
+    # 1 = surtension
+    # La mise à 1 de ce bit peut provoquer une alarme à destination du concentrateur en fonction du registre « AlarmFilter »
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    name: ${Name_Linky_STATUS_Dpr}
+    id: TIC_STATUS_Dpr
+    # 0 = pas de dépassement
+    # 1 = dépassement en cours
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    name: ${Name_Linky_STATUS_Fpc}
+    id: TIC_STATUS_Fpc
+    # 0 = consommateur
+    # 1 = producteur
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    name: ${Name_Linky_STATUS_Sea}
+    id: TIC_STATUS_Sea 
+    # 0 = énergie active positive
+    # 1 = énergie active négative
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    name: ${Name_Linky_STATUS_Hd}
+    id: TIC_STATUS_Hd
+    # 0 = horloge correcte
+    # 1 = horloge en mode dégradée
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    name: ${Name_Linky_STATUS_Sti}
+    id: TIC_STATUS_Sti
+    # 0 = mode historique
+    # 1 = mode standard
+    web_server:
+      sorting_group_id: sorting_group_TIC
+  
+  - platform: template
+    name: ${Name_Linky_STATUS_SyC}
+    id: TIC_STATUS_SyC
+    # 0= compteur non synchronisé
+    # 1 = compteur synchronisé
+    web_server:
+      sorting_group_id: sorting_group_TIC
 
 output:
   # Display backlight output
@@ -2442,13 +2786,13 @@ display:
             it.print(95, 2, id(FTitle), "W");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterA_Ch01}");
-            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipA_Ch01_power).state);
+            it.printf(66, 21, id(FContent), "%7.1f", id(MeteringChipA_Ch01_power).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterA_Ch02}");
-            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipA_Ch02_power).state);
+            it.printf(66, 36, id(FContent), "%7.1f", id(MeteringChipA_Ch02_power).state);
             it.line(10, 49, 118, 49);
             it.printf(0, 51, id(FContent), "${NameMeterA_Ch03}");
-            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipA_Ch03_power).state);
+            it.printf(66, 51, id(FContent), "%7.1f", id(MeteringChipA_Ch03_power).state);
             break;
 
           // This page shows the measure of chip B
@@ -2457,13 +2801,13 @@ display:
             it.print(95, 2, id(FTitle), "W");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterB_Ch01}");
-            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipB_Ch01_power).state);
+            it.printf(66, 21, id(FContent), "%7.1f", id(MeteringChipB_Ch01_power).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterB_Ch02}");
-            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipB_Ch02_power).state);
+            it.printf(66, 36, id(FContent), "%7.1f", id(MeteringChipB_Ch02_power).state);
             it.line(10, 49, 118, 49);
             it.printf(0, 51, id(FContent), "${NameMeterB_Ch03}");
-            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipB_Ch03_power).state);
+            it.printf(66, 51, id(FContent), "%7.1f", id(MeteringChipB_Ch03_power).state);
             break;
 
             break;
@@ -2474,13 +2818,13 @@ display:
             it.print(95, 2, id(FTitle), "W");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterC_Ch01}");
-            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipC_Ch01_power).state);
+            it.printf(66, 21, id(FContent), "%7.1f", id(MeteringChipC_Ch01_power).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterC_Ch02}");
-            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipC_Ch02_power).state);
+            it.printf(66, 36, id(FContent), "%7.1f", id(MeteringChipC_Ch02_power).state);
             it.line(10, 49, 118, 49);
             it.print(0, 51, id(FContent), "${NameMeterC_Ch03}");
-            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipC_Ch03_power).state);
+            it.printf(66, 51, id(FContent), "%7.1f", id(MeteringChipC_Ch03_power).state);
             break;
 
           // This page shows the measure of chip D
@@ -2489,13 +2833,13 @@ display:
             it.print(95, 2, id(FTitle), "W");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterD_Ch01}");
-            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipD_Ch01_power).state);
+            it.printf(66, 21, id(FContent), "%7.1f", id(MeteringChipD_Ch01_power).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterD_Ch02}");
-            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipD_Ch02_power).state);
+            it.printf(66, 36, id(FContent), "%7.1f", id(MeteringChipD_Ch02_power).state);
             it.line(10, 49, 118, 49);
             it.print(0, 51, id(FContent), "${NameMeterD_Ch03}");
-            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipD_Ch03_power).state);
+            it.printf(66, 51, id(FContent), "%7.1f", id(MeteringChipD_Ch03_power).state);
             break;
 
           // This page shows the measure of chip E
@@ -2504,13 +2848,13 @@ display:
             it.print(95, 2, id(FTitle), "W");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterE_Ch01}");
-            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipE_Ch01_power).state);
+            it.printf(66, 21, id(FContent), "%7.1f", id(MeteringChipE_Ch01_power).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterE_Ch02}");
-            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipE_Ch02_power).state);
+            it.printf(66, 36, id(FContent), "%7.1f", id(MeteringChipE_Ch02_power).state);
             it.line(10, 49, 118, 49);
             it.print(0, 51, id(FContent), "${NameMeterE_Ch03}");
-            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipE_Ch03_power).state);
+            it.printf(66, 51, id(FContent), "%7.1f", id(MeteringChipE_Ch03_power).state);
             break;
 
           // This page shows the measure of chip F
@@ -2519,13 +2863,13 @@ display:
             it.print(95, 2, id(FTitle), "W");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterF_Ch01}");
-            it.printf(66, 21, id(FContent), "%5.0f", id(MeteringChipF_Ch01_power).state);
+            it.printf(66, 21, id(FContent), "%7.1f", id(MeteringChipF_Ch01_power).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterF_Ch02}");
-            it.printf(66, 36, id(FContent), "%5.0f", id(MeteringChipF_Ch02_power).state);
+            it.printf(66, 36, id(FContent), "%7.1f", id(MeteringChipF_Ch02_power).state);
             it.line(10, 49, 118, 49);
             it.print(0, 51, id(FContent), "${NameMeterF_Ch03}");
-            it.printf(66, 51, id(FContent), "%5.0f", id(MeteringChipF_Ch03_power).state);
+            it.printf(66, 51, id(FContent), "%7.1f", id(MeteringChipF_Ch03_power).state);
             break;
 
           // This page shows the total energy from electrical meter (TIC informations)
@@ -2548,13 +2892,13 @@ display:
             it.print(92, 2, id(FTitle), "kWh/J");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterA_Ch01}");
-            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipA_Ch01_Energy).state);
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipA_Ch01_Energy_Daily).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterA_Ch02}");
-            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipA_Ch02_Energy).state);
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipA_Ch02_Energy_Daily).state);
             it.line(10, 49, 118, 49);
             it.printf(0, 51, id(FContent), "${NameMeterA_Ch03}");
-            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipA_Ch03_Energy).state);
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipA_Ch03_Energy_Daily).state);
             break;
 
           // This page shows the total energy for chip B
@@ -2563,13 +2907,13 @@ display:
             it.print(92, 2, id(FTitle), "kWh/J");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterB_Ch01}");
-            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipB_Ch01_Energy).state);
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipB_Ch01_Energy_Daily).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterB_Ch02}");
-            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipB_Ch02_Energy).state);
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipB_Ch02_Energy_Daily).state);
             it.line(10, 49, 118, 49);
             it.printf(0, 51, id(FContent), "${NameMeterB_Ch03}");
-            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipB_Ch03_Energy).state);
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipB_Ch03_Energy_Daily).state);
 
             break;
 
@@ -2579,13 +2923,13 @@ display:
             it.print(92, 2, id(FTitle), "kWh/J");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterC_Ch01}");
-            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipC_Ch01_Energy).state);
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipC_Ch01_Energy_Daily).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterC_Ch02}");
-            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipC_Ch02_Energy).state);
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipC_Ch02_Energy_Daily).state);
             it.line(10, 49, 118, 49);
             it.printf(0, 51, id(FContent), "${NameMeterC_Ch03}");
-            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipC_Ch03_Energy).state);
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipC_Ch03_Energy_Daily).state);
             break;
 
           // This page shows the total energy for chip D
@@ -2594,13 +2938,13 @@ display:
             it.print(92, 2, id(FTitle), "kWh/J");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterD_Ch01}");
-            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipD_Ch01_Energy).state);
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipD_Ch01_Energy_Daily).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterD_Ch02}");
-            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipD_Ch02_Energy).state);
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipD_Ch02_Energy_Daily).state);
             it.line(10, 49, 118, 49);
             it.printf(0, 51, id(FContent), "${NameMeterD_Ch03}");
-            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipD_Ch03_Energy).state);
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipD_Ch03_Energy_Daily).state);
             break;
 
           // This page shows the total energy for chip E
@@ -2609,13 +2953,13 @@ display:
             it.print(92, 2, id(FTitle), "kWh/J");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterE_Ch01}");
-            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipE_Ch01_Energy).state);
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipE_Ch01_Energy_Daily).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterE_Ch02}");
-            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipE_Ch02_Energy).state);
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipE_Ch02_Energy_Daily).state);
             it.line(10, 49, 118, 49);
             it.printf(0, 51, id(FContent), "${NameMeterE_Ch03}");
-            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipE_Ch03_Energy).state);
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipE_Ch03_Energy_Daily).state);
             break;
 
           // This page shows the total energy for chip F
@@ -2624,13 +2968,13 @@ display:
             it.print(92, 2, id(FTitle), "kWh/J");
             it.line(10, 19, 118, 19);
             it.print(0, 21, id(FContent), "${NameMeterF_Ch01}");
-            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipF_Ch01_Energy).state);
+            it.printf(56, 21, id(FContent), "%8.0f", id(MeteringChipF_Ch01_Energy_Daily).state);
             it.line(10, 34, 118, 34);
             it.print(0, 36, id(FContent), "${NameMeterF_Ch02}");
-            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipF_Ch02_Energy).state);
+            it.printf(56, 36, id(FContent), "%8.0f", id(MeteringChipF_Ch02_Energy_Daily).state);
             it.line(10, 49, 118, 49);
             it.printf(0, 51, id(FContent), "${NameMeterF_Ch03}");
-            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipF_Ch03_Energy).state);
+            it.printf(56, 51, id(FContent), "%8.0f", id(MeteringChipF_Ch03_Energy_Daily).state);
             break;
 
           // This page shows the 3 TOR counters data
@@ -2710,13 +3054,13 @@ display:
 
           case 91:
             it.print(0, 2, id(FTitle), "${PageTitleTIC}");
-            it.print(82, 2, id(FTitle), "${NameTICCurrentD}");
             it.line(10, 19, 118, 19);
-            it.print(0, 21, id(FContent), "${NameTICColor}");
-            it.printf(62, 21, id(FContent), "%6s", id(TIC_PTEC).state.c_str());
-            it.line(10, 46, 118, 46);
-            it.print(0, 48, id(FContent), "${NameTIC_ADCO}");
-            it.printf(0, 48, id(FContent), "%20s", id(TIC_ADCO).state.c_str());
+            it.printf(0, 21, id(FContent), "%s", id(TIC_LTARF).state.c_str());
+            it.print(0, 32, id(FContent), "${NameTIC_PDL}");
+            it.printf(34, 32, id(FContent), "%s", id(TIC_PRM).state.c_str());
+            it.printf(0, 42, id(FContent), "%s", id(TIC_MSG1).state.c_str());
+            it.printf(6, 53, id(FContent), "%6.2f V", id(TIC_URMS1).state);
+            it.printf(62, 53, id(FContent), "%6.2f A", id(TIC_IRMS1).state);
             break;
          
           // Turn off display
@@ -2748,42 +3092,42 @@ interval:
     then:
       - if:
           condition:
-            lambda: 'return strcmp("HPJR",id(TIC_PTEC).state.c_str()) == 0 || strcmp("HP..",id(TIC_PTEC).state.c_str()) == 0;'
+            lambda: 'return id(TIC_NTARF).state == 6;'
           then:
             - light.turn_on:
                 id: Status_LED
                 effect: "Red Purple Shading"
       - if:
           condition:
-            lambda: 'return strcmp("HCJR",id(TIC_PTEC).state.c_str()) == 0;'
+            lambda: 'return id(TIC_NTARF).state == 5;'
           then:
             - light.turn_on:
                 id: Status_LED
                 effect: "Red Shading"
       - if:
           condition:
-            lambda: 'return strcmp("HPJB",id(TIC_PTEC).state.c_str()) == 0;'
+            lambda: 'return id(TIC_NTARF).state == 2;'
           then:
             - light.turn_on:
                 id: Status_LED
                 effect: "Blue Purple Shading"
       - if:
           condition:
-            lambda: 'return strcmp("HCJB",id(TIC_PTEC).state.c_str()) == 0 || strcmp("HC..",id(TIC_PTEC).state.c_str()) == 0;'
+            lambda: 'return id(TIC_NTARF).state == 1;'
           then:
             - light.turn_on:
                 id: Status_LED
                 effect: "Blue Shading"
       - if:
           condition:
-            lambda: 'return strcmp("HPJB",id(TIC_PTEC).state.c_str()) == 0;'
+            lambda: 'return id(TIC_NTARF).state == 4;'
           then:
             - light.turn_on:
                 id: Status_LED
                 effect: "White Purple Shading"
       - if:
           condition:
-            lambda: 'return strcmp("HCJB",id(TIC_PTEC).state.c_str()) == 0;'
+            lambda: 'return id(TIC_NTARF).state == 3;'
           then:
             - light.turn_on:
                 id: Status_LED
